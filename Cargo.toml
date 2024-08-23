@@ -6,3 +6,5 @@ edition = "2021"
 [dependencies]
 bevy = { version = "0.14.1" }
 mint = { version = "0.5.9" }
+rand = { version = "0.8.5", features = [] }
+rand_pcg = "0.3.1"

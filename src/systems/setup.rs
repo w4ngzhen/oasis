@@ -1,3 +1,8 @@
+use crate::components::field_of_vision::FieldOfVision;
+use crate::components::name::Name;
+use crate::components::player::Player;
+use crate::components::position::Position;
+use crate::resources::map::Map;
 use bevy::prelude::*;
 
 pub fn setup_assets(
@@ -13,6 +18,17 @@ pub fn setup_assets(
     let texture_atlas_layout_handle = texture_atlas_layouts.add(layout);
 }
 
-pub fn setup() {
-    println!("hello, world.")
+pub fn setup_world_map(world: &mut World) {
+    world.insert_resource(Map::new_map());
+}
+
+pub fn setup_player(mut commands: Commands, map: Res<Map>) {
+    let first_room = map.rooms[0];
+    let (player_x, player_y) = first_room.center().to_tuple();
+    commands.spawn((
+        Player,
+        Name("Tom".to_string()),
+        FieldOfVision { visible_tiles: vec![], range: 8, invalid: true },
+        Position { x: player_x, y: player_y },
+    ));
 }
