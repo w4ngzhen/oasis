@@ -1,2 +1,3 @@
-pub mod setup;
-pub mod keyboard_input;
+use bevy::prelude::*;
+
+pub(crate) mod setup;
