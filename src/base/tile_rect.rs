@@ -14,10 +14,11 @@ impl TileRect {
     }
 
     pub fn left_top(&self) -> Position {
-        Position::from([self.x, self.y])
+        Position::from([self.x, self.y, 0])
     }
+
     pub fn right_bottom(&self) -> Position {
-        Position::from([self.x + self.w, self.y + self.h])
+        Position::from([self.x + self.w, self.y + self.h, 0])
     }
 
     pub fn intersect(&self, other: &TileRect) -> bool {
@@ -37,6 +38,6 @@ impl TileRect {
         let y1 = self.y;
         let x2 = x1 + self.w;
         let y2 = y1 + self.h;
-        Position::from([(x1 + x2) / 2, (y1 + y2) / 2])
+        Position::from([(x1 + x2) / 2, (y1 + y2) / 2, 0])
     }
 }

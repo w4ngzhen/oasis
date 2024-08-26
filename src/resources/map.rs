@@ -46,8 +46,8 @@ impl Map {
                 apply_room_to_map(&new_room, &mut map_tiles);
 
                 if !rooms.is_empty() {
-                    let (new_x, new_y) = new_room.center().to_tuple();
-                    let (prev_x, prev_y) = rooms[rooms.len() - 1].center().to_tuple();
+                    let (new_x, new_y, _) = new_room.center().to_tuple();
+                    let (prev_x, prev_y, _) = rooms[rooms.len() - 1].center().to_tuple();
                     if rng.range(0, 2) == 1 {
                         apply_horizontal_tunnel(&mut map_tiles, prev_x, new_x, prev_y);
                         apply_vertical_tunnel(&mut map_tiles, prev_y, new_y, new_x);
