@@ -1,7 +1,7 @@
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::name::Name;
-use crate::components::player::Player;
 use crate::components::position::Position;
+use crate::components::role::Player;
 use crate::resources::map::Map;
 use bevy::prelude::*;
 

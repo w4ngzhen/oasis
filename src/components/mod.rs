@@ -1,5 +1,8 @@
-pub mod position;
-pub mod name;
+use bevy::prelude::*;
+
+pub mod attributes;
+pub mod role;
+
 pub mod field_of_vision;
-pub mod player;
-pub mod monster;
+pub mod name;
+pub mod position;

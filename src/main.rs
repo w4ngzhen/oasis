@@ -12,9 +12,15 @@ mod in_gaming;
 mod in_main_menu;
 mod in_player_config;
 mod in_portal;
+mod map;
 mod resources;
 mod systems;
 mod utils;
+
+mod prelude {
+    pub const REGION_TILE_HEIGHT: u64 = 80;
+    pub const REGION_TILE_WIDTH: u64 = 80;
+}
 
 fn main() {
     App::new()

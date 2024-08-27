@@ -1,5 +1,5 @@
 use crate::components::position::Position;
-use bevy::prelude::Component;
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct FieldOfVision {
