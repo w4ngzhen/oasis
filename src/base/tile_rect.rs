@@ -1,4 +1,6 @@
 use crate::components::position::Position;
+use std::cmp::min;
+use std::num;
 
 #[derive(PartialEq, Copy, Clone, Debug)]
 pub struct TileRect {
@@ -11,6 +13,16 @@ pub struct TileRect {
 impl TileRect {
     pub fn new(x: u64, y: u64, w: u64, h: u64) -> Self {
         TileRect { x, y, w, h }
+    }
+
+    pub fn new_with_corner(x1: u64, y1: u64, x2: u64, y2: u64) -> Self {
+        let left = min(x1, x2);
+        let top = min(y1, y2);
+        TileRect { x: left, y: top, w: x1.abs_diff(x2), h: y1.abs_diff(y2) }
+    }
+
+    pub fn zero() -> Self {
+        Self::new(0, 0, 0, 0)
     }
 
     pub fn left_top(&self) -> Position {
@@ -39,5 +51,16 @@ impl TileRect {
         let x2 = x1 + self.w;
         let y2 = y1 + self.h;
         Position::from([(x1 + x2) / 2, (y1 + y2) / 2, 0])
+    }
+
+    pub fn for_each<F>(&self, mut f: F)
+    where
+        F: FnMut(Position),
+    {
+        for y in self.y..self.y + self.h {
+            for x in self.x..self.x + self.h {
+                f(Position::new_with_2d(x, y));
+            }
+        }
     }
 }

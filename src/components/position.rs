@@ -30,6 +30,11 @@ impl Position {
     pub fn new(x: u64, y: u64, z: u64) -> Self {
         Self { x, y, z }
     }
+
+    pub fn new_with_2d(x: u64, y: u64) -> Self {
+        Self { x, y, z: 0 }
+    }
+
     pub fn from(data: [u64; 3]) -> Self {
         let [x, y, z] = data;
         Position::new(x, y, z)
