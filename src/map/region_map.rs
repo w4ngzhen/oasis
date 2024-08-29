@@ -55,7 +55,11 @@ impl RegionMap {
     }
 }
 
-pub fn spawn_map_tiles(mut commands: Commands, mb: Res<MapBuilder>, atlas: Res<CharsetAsset>) {
+pub fn spawn_map_tiles(
+    mut commands: Commands,
+    mb: Res<MapBuilder>,
+    charset_asset: Res<CharsetAsset>,
+) {
     for y in 0..REGION_TILE_HEIGHT {
         for x in 0..REGION_TILE_WIDTH {
             let idx = map_idx(x, y);
@@ -70,26 +74,24 @@ pub fn spawn_map_tiles(mut commands: Commands, mb: Res<MapBuilder>, atlas: Res<C
                             SpriteBundle {
                                 sprite: Sprite {
                                     color: render_descriptor.color,
-                                    custom_size: Some(Vec2::new(1.0, 1.0)),
                                     ..Default::default()
                                 },
-                                visibility: Visibility::Hidden,
                                 ..Default::default()
+                            },
+                            TextureAtlas {
+                                layout: charset_asset.atlas.clone(),
+                                index: render_descriptor.tile_index,
                             },
                         ));
                     }
                     TileType::Wall => {
                         if let Some(bkg_color) = render_descriptor.bg_color {
+                            // 背景色
                             commands.spawn((
                                 MapTile,
                                 Position { x, y, z: 0 }, // z = 0, background color.
                                 SpriteBundle {
-                                    sprite: Sprite {
-                                        color: bkg_color,
-                                        custom_size: Some(Vec2::new(1.0, 1.0)),
-                                        ..Default::default()
-                                    },
-                                    visibility: Visibility::Hidden,
+                                    sprite: Sprite { color: bkg_color, ..Default::default() },
                                     ..Default::default()
                                 },
                             ));
@@ -101,16 +103,14 @@ pub fn spawn_map_tiles(mut commands: Commands, mb: Res<MapBuilder>, atlas: Res<C
                             SpriteBundle {
                                 sprite: Sprite {
                                     color: render_descriptor.color,
-                                    custom_size: Some(Vec2::new(1.0, 1.0)),
                                     ..Default::default()
                                 },
-                                texture: atlas.texture.clone(),
-                                visibility: Visibility::Hidden,
+                                texture: charset_asset.texture.clone(),
                                 ..Default::default()
                             },
                             TextureAtlas {
-                                layout: atlas.atlas.clone(),
-                                index: render_descriptor.index,
+                                layout: charset_asset.atlas.clone(),
+                                index: render_descriptor.tile_index,
                             },
                         ));
                     }
