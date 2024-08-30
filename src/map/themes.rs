@@ -11,24 +11,20 @@ pub struct TileRenderDescriptor {
 }
 
 impl TileRenderDescriptor {
-    fn new(tile_index: usize, color: Color, bg_color: Color) -> Self {
-        Self { tile_index, color, bg_color: Some(bg_color) }
-    }
-
-    fn new_with_no_bg_color(tile_index: usize, color: Color) -> Self {
-        Self { tile_index, color, bg_color: None }
+    fn new(tile_index: usize, color: Color, bg_color: Option<Color>) -> Self {
+        Self { tile_index, color, bg_color }
     }
 }
 
 pub fn tile_to_render_descriptor(tile_type: TileType) -> Option<TileRenderDescriptor> {
-    let glyph_color = Color::srgba(1., 0.3, 0.3, 1.0);
-    let wall_color = Color::srgba(1., 0.05, 0.05, 1.0);
-    let floor_color = Color::srgba(0.529, 0.529, 0.529, 1.0);
+    let wall_color = Color::srgba(1., 1., 1., 1.0);
+    let floor_color = Color::srgba(0.3, 0.3, 0.3, 1.0);
+    let bg_color = Color::srgba(0., 0., 0., 1.);
 
     match tile_type {
-        // index = 219 is a full square
-        TileType::Floor => Some(TileRenderDescriptor::new_with_no_bg_color(3, floor_color)),
-        TileType::Wall => Some(TileRenderDescriptor::new('#' as usize, glyph_color, wall_color)),
+        // index = 7 is a point
+        TileType::Floor => Some(TileRenderDescriptor::new(7, floor_color, Some(bg_color))),
+        TileType::Wall => Some(TileRenderDescriptor::new('#' as usize, wall_color, Some(bg_color))),
         _ => None,
     }
 }

@@ -1,7 +1,7 @@
 use crate::components::position::Position;
 use crate::components::MapTile;
 use crate::map::map_builder::MapBuilder;
-use crate::map::themes::tile_to_render_descriptor;
+use crate::map::themes::{tile_to_render_descriptor, TileRenderDescriptor};
 use crate::prelude::*;
 use crate::resources::CharsetAsset;
 use bevy::prelude::*;
@@ -66,57 +66,57 @@ pub fn spawn_map_tiles(
             let render_descriptor = tile_to_render_descriptor(mb.region_map.tiles[idx]);
 
             if let Some(render_descriptor) = render_descriptor {
-                match mb.region_map.tiles[idx] {
-                    TileType::Floor => {
-                        commands.spawn((
-                            MapTile,
-                            Position { x, y, z: 1 },
-                            SpriteBundle {
-                                sprite: Sprite {
-                                    color: render_descriptor.color,
-                                    ..Default::default()
-                                },
-                                ..Default::default()
-                            },
-                            TextureAtlas {
-                                layout: charset_asset.atlas.clone(),
-                                index: render_descriptor.tile_index,
-                            },
-                        ));
-                    }
-                    TileType::Wall => {
-                        if let Some(bkg_color) = render_descriptor.bg_color {
-                            // 背景色
-                            commands.spawn((
-                                MapTile,
-                                Position { x, y, z: 0 }, // z = 0, background color.
-                                SpriteBundle {
-                                    sprite: Sprite { color: bkg_color, ..Default::default() },
-                                    ..Default::default()
-                                },
-                            ));
-                        }
-
-                        commands.spawn((
-                            MapTile,
-                            Position { x, y, z: 1 }, // z = 1, foreground color.
-                            SpriteBundle {
-                                sprite: Sprite {
-                                    color: render_descriptor.color,
-                                    ..Default::default()
-                                },
-                                texture: charset_asset.texture.clone(),
-                                ..Default::default()
-                            },
-                            TextureAtlas {
-                                layout: charset_asset.atlas.clone(),
-                                index: render_descriptor.tile_index,
-                            },
-                        ));
-                    }
-                    TileType::Void => (),
-                }
+                spawn_map_tile_sprite(
+                    &mut commands,
+                    &charset_asset,
+                    &render_descriptor,
+                    &Position::new(x, y, 0),
+                );
             }
         }
     }
+}
+
+fn spawn_map_tile_sprite(
+    commands: &mut Commands,
+    charset_asset: &Res<CharsetAsset>,
+    tile_render_descriptor: &TileRenderDescriptor,
+    pos: &Position,
+) {
+    // 背景色
+    if let Some(bg_color) = tile_render_descriptor.bg_color {
+        commands.spawn((
+            MapTile,
+            Position { x: pos.x, y: pos.y, z: 0 }, // z = 0, background.
+            SpriteBundle {
+                sprite: Sprite {
+                    color: bg_color,
+                    // 所有的图块初始都是 1x1的尺寸
+                    // 我们会在相关系统中进行缩放处理
+                    custom_size: Some(Vec2::new(1., 1.)),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+        ));
+    }
+    commands.spawn((
+        MapTile,
+        Position { x: pos.x, y: pos.y, z: 1 }, // z = 1, foreground.
+        SpriteBundle {
+            sprite: Sprite {
+                color: tile_render_descriptor.color,
+                // 所有的图块初始都是 1x1的尺寸
+                // 我们会在相关系统中进行缩放处理
+                custom_size: Some(Vec2::new(1., 1.)),
+                ..Default::default()
+            },
+            texture: charset_asset.texture.clone(),
+            ..Default::default()
+        },
+        TextureAtlas {
+            layout: charset_asset.atlas.clone(),
+            index: tile_render_descriptor.tile_index,
+        },
+    ));
 }

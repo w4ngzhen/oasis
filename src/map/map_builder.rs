@@ -1,27 +1,24 @@
 use crate::base::tile_rect::TileRect;
-use crate::components::position::Position;
 use crate::map::region_map::{RegionMap, TileType};
 use crate::prelude::*;
+use crate::utils::rand_gen::RandGen;
 use bevy::prelude::*;
 use rand::Rng;
-
-const NUM_ROOMS: usize = 5;
+use std::cmp::{max, min};
+const MAX_ROOMS: usize = 10;
+const MIN_ROOM_SIZE: u64 = 6;
+const MAX_ROOM_SIZE: u64 = 10;
 
 #[derive(Resource)]
 pub struct MapBuilder {
     pub region_map: RegionMap,
-    walls: Vec<TileRect>,
-    rooms: Vec<TileRect>,
 }
 
 impl MapBuilder {
     pub fn new() -> Self {
-        let mut mb =
-            MapBuilder { region_map: RegionMap::new(), rooms: Vec::new(), walls: Vec::new() };
-
-        mb.fill(TileType::Void);
-        mb.build_random_rooms();
-        mb.build_corridors();
+        let mut mb = MapBuilder { region_map: RegionMap::new() };
+        mb.fill(TileType::Wall);
+        mb.build_rooms();
         mb
     }
 
@@ -29,107 +26,79 @@ impl MapBuilder {
         self.region_map.tiles.iter_mut().for_each(|t| *t = tile);
     }
 
-    fn build_random_rooms(&mut self) {
-        let mut rng = rand::thread_rng();
+    fn build_rooms(&mut self) {
+        let mut rng = RandGen::new(Some(123));
+        //
+        let mut generated_rooms: Vec<TileRect> = Vec::new();
 
-        while self.rooms.len() < NUM_ROOMS {
-            let room = TileRect::new(
-                rng.gen_range(2..REGION_TILE_WIDTH - 12),
-                rng.gen_range(2..REGION_TILE_HEIGHT - 12),
-                rng.gen_range(2..12),
-                rng.gen_range(2..12),
-            );
-            let mut overlap = false;
-            for r in self.rooms.iter() {
-                if r.intersect(&room) {
-                    overlap = true;
+        for _ in 0..MAX_ROOMS {
+            let w = rng.range(MIN_ROOM_SIZE, MAX_ROOM_SIZE);
+            let h = rng.range(MIN_ROOM_SIZE, MAX_ROOM_SIZE);
+            let x = rng.roll_dice(1, REGION_TILE_WIDTH - w - 1) - 1;
+            let y = rng.roll_dice(1, REGION_TILE_HEIGHT - h - 1) - 1;
+            let new_room = TileRect::new(x, y, w, h);
+            let mut ok = true;
+            for other_room in generated_rooms.iter() {
+                if new_room.intersect(other_room) {
+                    ok = false
                 }
             }
-            if !overlap {
-                let (right, bottom, _) = room.right_bottom().to_tuple();
-                let wall = TileRect::new_with_corner(room.x - 1, room.y - 1, right + 1, bottom + 1);
-                // First make the floor space that will be the room
-                room.for_each(|p| {
-                    if p.x > 0 && p.x < REGION_TILE_WIDTH && p.y > 0 && p.y < REGION_TILE_HEIGHT {
-                        let idx = map_idx(p.x, p.y);
-                        self.region_map.tiles[idx] = TileType::Floor;
+            if ok {
+                let map_tiles = &mut self.region_map.tiles;
+                self.apply_room_to_map(&new_room);
+                if !generated_rooms.is_empty() {
+                    let (new_x, new_y, _) = new_room.center().to_tuple();
+                    let (prev_x, prev_y, _) =
+                        generated_rooms[generated_rooms.len() - 1].center().to_tuple();
+                    if rng.range(0, 2) == 1 {
+                        self.apply_horizontal_tunnel(prev_x, new_x, prev_y);
+                        self.apply_vertical_tunnel(prev_y, new_y, new_x);
+                    } else {
+                        self.apply_vertical_tunnel(prev_y, new_y, prev_x);
+                        self.apply_horizontal_tunnel(prev_x, new_x, new_y);
                     }
-                });
-                // now place the walls around it
-                wall.for_each(|p| {
-                    if p.x > 0 && p.x < REGION_TILE_WIDTH && p.y > 0 && p.y < REGION_TILE_HEIGHT {
-                        let idx = map_idx(p.x, p.y);
-                        if self.region_map.tiles[idx] == TileType::Void {
-                            self.region_map.tiles[idx] = TileType::Wall;
-                        }
-                    }
-                });
-                self.rooms.push(room);
-                self.walls.push(wall);
+                }
+
+                generated_rooms.push(new_room);
             }
         }
     }
 
-    fn build_corridors(&mut self) {
-        let mut rng = rand::thread_rng();
-        let mut rooms = self.rooms.clone();
-        rooms.sort_by(|a, b| a.center().x.cmp(&b.center().x));
-
-        for (i, room) in rooms.iter().enumerate().skip(1) {
-            let prev = rooms[i - 1].center();
-            let new = room.center();
-
-            if rng.gen_range(0..2) == 1 {
-                self.apply_horizontal_tunnel_walls(prev.x, new.x, prev.y);
-                self.apply_vertical_tunnel_walls(prev.y, new.y, new.x);
-            } else {
-                self.apply_vertical_tunnel_walls(prev.y, new.y, prev.x);
-                self.apply_horizontal_tunnel_walls(prev.x, new.x, new.y);
+    fn apply_room_to_map(&mut self, room: &TileRect) {
+        let map_tiles = &mut self.region_map.tiles;
+        let lt = room.left_top();
+        let rb = room.right_bottom();
+        for y in lt.y + 1..=rb.y {
+            for x in lt.x + 1..=rb.x {
+                (*map_tiles)[map_idx(x, y)] = TileType::Floor;
             }
         }
     }
 
-    fn apply_horizontal_tunnel_walls(&mut self, x1: u64, x2: u64, y: u64) {
-        use std::cmp::{max, min};
+    fn apply_horizontal_tunnel(&mut self, x1: u64, x2: u64, y: u64) {
+        let map_tiles = &mut self.region_map.tiles;
         for x in min(x1, x2)..=max(x1, x2) {
-            if let Some(idx) = self.region_map.try_idx(&Position { x, y, z: 0 }) {
-                self.region_map.tiles[idx] = TileType::Floor;
-            }
-            if let Some(idx) = self.region_map.try_idx(&Position { x, y: y - 1, z: 0 }) {
-                if self.region_map.tiles[idx] == TileType::Void {
-                    self.region_map.tiles[idx] = TileType::Wall;
-                }
-            }
-            if let Some(idx) = self.region_map.try_idx(&Position { x, y: y + 1, z: 0 }) {
-                if self.region_map.tiles[idx] == TileType::Void {
-                    self.region_map.tiles[idx] = TileType::Wall;
-                }
+            let idx = map_idx(x, y);
+            if idx > 0 && idx < (REGION_TILE_WIDTH * REGION_TILE_HEIGHT) as usize {
+                map_tiles[idx] = TileType::Floor;
             }
         }
     }
 
-    fn apply_vertical_tunnel_walls(&mut self, y1: u64, y2: u64, x: u64) {
-        use std::cmp::{max, min};
+    fn apply_vertical_tunnel(&mut self, y1: u64, y2: u64, x: u64) {
+        let map_tiles = &mut self.region_map.tiles;
         for y in min(y1, y2)..=max(y1, y2) {
-            if let Some(idx) = self.region_map.try_idx(&Position { x, y, z: 0 }) {
-                self.region_map.tiles[idx] = TileType::Floor;
-            }
-            if let Some(idx) = self.region_map.try_idx(&Position { x: x - 1, y, z: 0 }) {
-                if self.region_map.tiles[idx] == TileType::Void {
-                    self.region_map.tiles[idx] = TileType::Wall;
-                }
-            }
-            if let Some(idx) = self.region_map.try_idx(&Position { x: x + 1, y, z: 0 }) {
-                if self.region_map.tiles[idx] == TileType::Void {
-                    self.region_map.tiles[idx] = TileType::Wall;
-                }
+            let idx = map_idx(x, y);
+            if idx > 0 && idx < (REGION_TILE_WIDTH * REGION_TILE_HEIGHT) as usize {
+                map_tiles[idx] = TileType::Floor;
             }
         }
     }
 }
 
 pub fn system_build_map(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+    let camera = Camera2dBundle::default();
+    commands.spawn(camera);
     let mb = MapBuilder::new();
     commands.insert_resource(mb);
 }

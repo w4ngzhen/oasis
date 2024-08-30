@@ -43,9 +43,9 @@ pub fn map_tile_size_scaling(
         for (mut transform) in q.iter_mut() {
             let scale = Vec3::new(
                 // 这里首先根据 屏幕尺寸 / tile地图尺寸，得到的是每个tile的实际尺寸
-                // 但因为我们在修改缩放scale，所以需要再除以tile图块物料本身的尺寸16
-                primary.width() / REGION_TILE_WIDTH as f32 / 16.,
-                primary.height() / REGION_TILE_HEIGHT as f32 / 16.,
+                // 在相关spawn代码中，我们将对应sprite的custom_size设置为了1x1，因此在这里直接进行缩放
+                primary.width() / REGION_TILE_WIDTH as f32,
+                primary.height() / REGION_TILE_HEIGHT as f32,
                 1.0,
             );
             transform.scale = scale;
