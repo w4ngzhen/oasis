@@ -9,6 +9,16 @@ pub struct Position {
     pub z: u64,
 }
 
+impl Position {
+    pub fn zero() -> Self {
+       Self {
+           x: 0,
+           y: 0,
+           z: 0
+       }
+    }
+}
+
 impl ops::Add<Position> for Position {
     type Output = Position;
     fn add(mut self, rhs: Position) -> Position {

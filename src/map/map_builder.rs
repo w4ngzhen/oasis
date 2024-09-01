@@ -1,10 +1,12 @@
 use crate::base::tile_rect::TileRect;
+use crate::components::position::Position;
 use crate::map::region_map::{RegionMap, TileType};
 use crate::prelude::*;
 use crate::utils::rand_gen::RandGen;
 use bevy::prelude::*;
 use rand::Rng;
 use std::cmp::{max, min};
+
 const MAX_ROOMS: usize = 10;
 const MIN_ROOM_SIZE: u64 = 6;
 const MAX_ROOM_SIZE: u64 = 10;
@@ -12,13 +14,20 @@ const MAX_ROOM_SIZE: u64 = 10;
 #[derive(Resource)]
 pub struct MapBuilder {
     pub region_map: RegionMap,
+    pub player_init_pos: Position,
+    pub rooms: Vec<TileRect>,
 }
 
 impl MapBuilder {
     pub fn new() -> Self {
-        let mut mb = MapBuilder { region_map: RegionMap::new() };
+        let mut mb = MapBuilder {
+            region_map: RegionMap::new(),
+            player_init_pos: Position::zero(),
+            rooms: Vec::new(),
+        };
         mb.fill(TileType::Wall);
         mb.build_rooms();
+        mb.setup_player_init_pos();
         mb
     }
 
@@ -44,7 +53,6 @@ impl MapBuilder {
                 }
             }
             if ok {
-                let map_tiles = &mut self.region_map.tiles;
                 self.apply_room_to_map(&new_room);
                 if !generated_rooms.is_empty() {
                     let (new_x, new_y, _) = new_room.center().to_tuple();
@@ -61,6 +69,14 @@ impl MapBuilder {
 
                 generated_rooms.push(new_room);
             }
+        }
+
+        self.rooms = generated_rooms;
+    }
+
+    fn setup_player_init_pos(&mut self) {
+        if let Some(first_room) = self.rooms.first() {
+            self.player_init_pos = first_room.center().clone();
         }
     }
 

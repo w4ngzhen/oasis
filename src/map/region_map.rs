@@ -5,6 +5,7 @@ use crate::map::themes::{tile_to_render_descriptor, TileRenderDescriptor};
 use crate::prelude::*;
 use crate::resources::CharsetAsset;
 use bevy::prelude::*;
+use crate::base::tile_rect::TileRect;
 
 const NUM_TILES: u64 = REGION_TILE_WIDTH * REGION_TILE_HEIGHT;
 
@@ -27,7 +28,7 @@ impl RegionMap {
     pub fn new() -> Self {
         Self {
             tiles: vec![TileType::Void; NUM_TILES as usize],
-            occupation: vec![None; NUM_TILES as usize],
+            occupation: vec![None; NUM_TILES as usize]
         }
     }
 
