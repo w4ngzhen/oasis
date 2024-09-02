@@ -2,7 +2,7 @@ use bevy::prelude::Component;
 use std::fmt::{Display, Formatter};
 use std::ops;
 
-#[derive(Component, Clone, Debug, Eq, Hash, Ord, PartialOrd)]
+#[derive(Component, Copy, Clone, Debug, Eq, Hash, Ord, PartialOrd)]
 pub struct Position {
     pub x: u64,
     pub y: u64,

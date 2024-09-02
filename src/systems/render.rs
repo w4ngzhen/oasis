@@ -1,6 +1,6 @@
 use crate::components::position::Position;
-use crate::components::MapTile;
-use crate::prelude::{REGION_TILE_HEIGHT, REGION_TILE_WIDTH, TILE_SIZE};
+use crate::components::TileElement;
+use crate::core_module::*;
 use bevy::math::Vec3;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
@@ -13,7 +13,7 @@ pub fn convert_pos(pos: f32, bound_window: f32, bound_game: f32) -> f32 {
 }
 
 /// 地图上每一个tile放置的到实际屏幕上的位置
-pub fn map_tile_position_translation(
+pub fn position_translation(
     primary_query: Query<&Window>,
     mut q: Query<(&Position, &mut Transform)>,
 ) {
@@ -32,12 +32,12 @@ pub fn map_tile_position_translation(
     }
 }
 
-/// 地图上每个tile的宽高，会根据当前屏幕的大小动态计算
+/// 界面上每个tile的宽高，会根据当前屏幕的大小动态计算
 /// 例如，当前窗口的 width = 1280，地图tile宽度为 80，则这个tile的宽度大小应为 1280 / 80 = 16
-/// 这里，我们通过查询带有MapTile组件的实体的Transform变换，对其进行修改
-pub fn map_tile_size_scaling(
+/// 这里，我们通过查询带有 TileElement 组件的实体的Transform变换，对其进行修改
+pub fn tile_element_size_scaling(
     primary_query: Query<&Window, With<PrimaryWindow>>,
-    mut q: Query<(&mut Transform), With<MapTile>>,
+    mut q: Query<(&mut Transform), With<TileElement>>,
 ) {
     if let Ok(primary) = primary_query.get_single() {
         for (mut transform) in q.iter_mut() {

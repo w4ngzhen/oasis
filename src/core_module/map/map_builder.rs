@@ -1,11 +1,11 @@
 use crate::base::tile_rect::TileRect;
 use crate::components::position::Position;
 use crate::map::region_map::{RegionMap, TileType};
-use crate::prelude::*;
 use crate::utils::rand_gen::RandGen;
 use bevy::prelude::*;
 use rand::Rng;
 use std::cmp::{max, min};
+use crate::core_module::*;
 
 const MAX_ROOMS: usize = 10;
 const MIN_ROOM_SIZE: u64 = 6;
@@ -112,9 +112,3 @@ impl MapBuilder {
     }
 }
 
-pub fn system_build_map(mut commands: Commands) {
-    let camera = Camera2dBundle::default();
-    commands.spawn(camera);
-    let mb = MapBuilder::new();
-    commands.insert_resource(mb);
-}

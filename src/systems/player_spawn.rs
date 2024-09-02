@@ -1,14 +1,20 @@
+use crate::components::position::Position;
 use crate::components::role::Player;
+use crate::components::TileElement;
+use crate::game_state::GameState;
 use crate::map::map_builder::MapBuilder;
 use crate::resources::CharsetAsset;
 use bevy::prelude::*;
-use crate::components::MapTile;
-use crate::components::position::Position;
 
-pub fn spawn_player(mut commands: Commands, atlas: Res<CharsetAsset>, mut mb: ResMut<MapBuilder>) {
+pub fn spawn_player(
+    mut commands: Commands,
+    atlas: Res<CharsetAsset>,
+    mut mb: ResMut<MapBuilder>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
     let player_start = mb.player_init_pos.clone();
     commands.spawn((
-        MapTile,
+        TileElement,
         Player,
         Position { x: player_start.x, y: player_start.y, z: 2 },
         SpriteBundle {
@@ -18,4 +24,6 @@ pub fn spawn_player(mut commands: Commands, atlas: Res<CharsetAsset>, mut mb: Re
         },
         TextureAtlas { layout: atlas.atlas.clone(), index: '@' as usize },
     ));
+    // player create, go to PlayerTurn state.
+    next_state.set(GameState::PlayerTurn);
 }

@@ -1,6 +1,5 @@
 use crate::components::position::Position;
 use std::cmp::min;
-use std::num;
 
 #[derive(PartialEq, Copy, Clone, Debug)]
 pub struct TileRect {

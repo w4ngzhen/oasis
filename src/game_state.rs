@@ -13,6 +13,8 @@ pub enum GameState {
     InGameSetting,
     /// 游戏中
     InGaming,
+    /// 游戏中 - 玩家回合
+    PlayerTurn,
     /// 暂停游戏
     Paused,
 }
