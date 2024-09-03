@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::components::position::Position;
+use bevy::prelude::*;
 
 pub mod attributes;
 pub mod role;
@@ -19,3 +19,11 @@ pub struct Movement {
     pub entity: Entity,
     pub destination: Position,
 }
+
+/// 游戏地图摄像机，只关注地图场景渲染
+#[derive(Component, Clone, Copy)]
+pub struct GameMapCamera;
+
+/// 游戏UI模块Camera
+#[derive(Component, Clone, Copy)]
+pub struct GameUiCamera;

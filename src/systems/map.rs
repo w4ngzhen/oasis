@@ -1,15 +1,28 @@
 use crate::components::position::Position;
-use crate::components::TileElement;
+use crate::components::{GameMapCamera, TileElement};
+use crate::core_module::*;
 use crate::game_state::GameState;
 use crate::map::map_builder::MapBuilder;
 use crate::map::themes::{tile_to_render_descriptor, TileRenderDescriptor};
 use crate::resources::CharsetAsset;
 use bevy::prelude::*;
-use crate::core_module::*;
+use bevy::render::camera::Viewport;
 
-pub fn build_map(mut commands: Commands) {
-    let camera = Camera2dBundle::default();
-    commands.spawn(camera);
+pub fn setup_map(mut commands: Commands, query: Query<&Window>) {
+    // prepare camera
+    let window = query.single();
+    let size = window.physical_size() / 2;
+    commands.spawn((
+        GameMapCamera,
+        Camera2dBundle {
+            camera: Camera {
+                order: 1,
+                viewport: Some(Viewport { physical_size: size, ..default() }),
+                ..default()
+            },
+            ..default()
+        },
+    ));
     let mb = MapBuilder::new();
     commands.insert_resource(mb);
 }

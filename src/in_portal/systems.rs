@@ -4,7 +4,6 @@ use crate::game_state::GameState;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::ops::DerefMut;
-use std::thread::spawn;
 
 pub fn setup_portal(mut commands: Commands, asset_server: Res<AssetServer>) {
     let icon = asset_server.load("branding/icon.png");
