@@ -1,14 +1,9 @@
-use crate::components::GameUiCamera;
+use crate::components::GameHudCamera;
 use bevy::prelude::*;
 use bevy::utils::default;
 
-pub fn spawn_ui(mut commands: Commands) {
-    let camera_entity = commands
-        .spawn((
-            GameUiCamera,
-            Camera2dBundle { camera: Camera { order: 999, ..default() }, ..default() },
-        ))
-        .id();
+pub fn spawn_game_hud(mut commands: Commands, query: Query<Entity, With<GameHudCamera>>) {
+    let camera_entity = query.single();
     commands.spawn((
         TargetCamera(camera_entity),
         NodeBundle {

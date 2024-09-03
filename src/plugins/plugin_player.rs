@@ -1,8 +1,8 @@
 use crate::game_state::GameState;
 use crate::systems::movement::movement;
 use crate::systems::player_input::player_input;
-use bevy::prelude::*;
 use crate::systems::player_spawn::spawn_player;
+use bevy::prelude::*;
 
 pub struct PlayerPlugin;
 

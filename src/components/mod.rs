@@ -24,6 +24,6 @@ pub struct Movement {
 #[derive(Component, Clone, Copy)]
 pub struct GameMapCamera;
 
-/// 游戏UI模块Camera
+/// 游戏HUD模块Camera
 #[derive(Component, Clone, Copy)]
-pub struct GameUiCamera;
+pub struct GameHudCamera;

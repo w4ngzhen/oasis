@@ -2,7 +2,7 @@ use crate::components::position::Position;
 use crate::core_module::*;
 use bevy::prelude::*;
 
-const NUM_TILES: u64 = REGION_TILE_WIDTH * REGION_TILE_HEIGHT;
+const NUM_TILES: u64 = GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum TileType {
@@ -12,14 +12,14 @@ pub enum TileType {
     Void,
 }
 
-pub struct RegionMap {
+pub struct GameMap {
     /// 地图上的Wall、Floor、Void（虚空）是固定资源，所以不是实体Entity
     pub tiles: Vec<TileType>,
     /// 地图上某些地方占据的东西是实体Entity
     pub occupation: Vec<Option<Entity>>,
 }
 
-impl RegionMap {
+impl GameMap {
     pub fn new() -> Self {
         Self {
             tiles: vec![TileType::Void; NUM_TILES as usize],
@@ -29,9 +29,9 @@ impl RegionMap {
 
     pub fn in_bounds(&self, position: &Position) -> bool {
         position.x >= 0
-            && position.x < REGION_TILE_WIDTH
+            && position.x < GAME_MAP_TILE_WIDTH
             && position.y >= 0
-            && position.y < REGION_TILE_HEIGHT
+            && position.y < GAME_MAP_TILE_HEIGHT
     }
 
     pub fn can_enter_tile<T: Into<Position>>(&self, position: &Position) -> bool {

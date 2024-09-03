@@ -1,4 +1,4 @@
-use crate::map::region_map::TileType;
+use crate::core_module::game_map::game_map::TileType;
 use bevy::prelude::*;
 
 pub struct TileRenderDescriptor {

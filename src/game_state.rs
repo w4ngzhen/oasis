@@ -11,6 +11,8 @@ pub enum GameState {
     InPlayerConfig,
     /// 游戏配置
     InGameSetting,
+    /// 进入游戏前系统准备
+    PrepareGame,
     /// 游戏中
     InGaming,
     /// 游戏中 - 玩家回合

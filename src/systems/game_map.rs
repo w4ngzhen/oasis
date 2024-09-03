@@ -1,42 +1,28 @@
 use crate::components::position::Position;
-use crate::components::{GameMapCamera, TileElement};
+use crate::components::TileElement;
+use crate::core_module::game_map::game_map_builder::GameMapBuilder;
+use crate::core_module::game_map::themes::{tile_to_render_descriptor, TileRenderDescriptor};
 use crate::core_module::*;
 use crate::game_state::GameState;
-use crate::map::map_builder::MapBuilder;
-use crate::map::themes::{tile_to_render_descriptor, TileRenderDescriptor};
 use crate::resources::CharsetAsset;
 use bevy::prelude::*;
-use bevy::render::camera::Viewport;
 
-pub fn setup_map(mut commands: Commands, query: Query<&Window>) {
+pub fn setup_game_map(mut commands: Commands) {
     // prepare camera
-    let window = query.single();
-    let size = window.physical_size() / 2;
-    commands.spawn((
-        GameMapCamera,
-        Camera2dBundle {
-            camera: Camera {
-                order: 1,
-                viewport: Some(Viewport { physical_size: size, ..default() }),
-                ..default()
-            },
-            ..default()
-        },
-    ));
-    let mb = MapBuilder::new();
+    let mb = GameMapBuilder::new();
     commands.insert_resource(mb);
 }
 
 pub fn spawn_map_tiles(
     mut commands: Commands,
-    mb: Res<MapBuilder>,
+    mb: Res<GameMapBuilder>,
     charset_asset: Res<CharsetAsset>,
-    mut next_state: ResMut<NextState<GameState>>,
+    mut _next_state: ResMut<NextState<GameState>>,
 ) {
-    for y in 0..REGION_TILE_HEIGHT {
-        for x in 0..REGION_TILE_WIDTH {
+    for y in 0..GAME_MAP_TILE_HEIGHT {
+        for x in 0..GAME_MAP_TILE_WIDTH {
             let idx = map_idx(x, y);
-            let render_descriptor = tile_to_render_descriptor(mb.region_map.tiles[idx]);
+            let render_descriptor = tile_to_render_descriptor(mb.game_map.tiles[idx]);
 
             if let Some(render_descriptor) = render_descriptor {
                 utils_spawn_map_tile_sprite(
@@ -48,7 +34,6 @@ pub fn spawn_map_tiles(
             }
         }
     }
-    next_state.set(GameState::PlayerTurn);
 }
 
 fn utils_spawn_map_tile_sprite(

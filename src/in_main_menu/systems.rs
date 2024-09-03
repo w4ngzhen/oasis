@@ -56,7 +56,7 @@ pub fn menu_button_system(
     mut text_query: Query<&mut Text>,
 ) {
     fn set_text_color(text: &mut Text, color: Color) {
-        text.sections.iter_mut().for_each(|mut section| {
+        text.sections.iter_mut().for_each(|section| {
             section.style.color = color;
         })
     }
@@ -70,7 +70,7 @@ pub fn menu_button_system(
                         game_state.deref_mut().set(GameState::InPlayerConfig);
                     }
                     MenuButtonAction::ContinueGame => {
-                        game_state.deref_mut().set(GameState::InGaming);
+                        game_state.deref_mut().set(GameState::PrepareGame);
                     }
                     MenuButtonAction::Settings => {
                         game_state.deref_mut().set(GameState::InGameSetting);
