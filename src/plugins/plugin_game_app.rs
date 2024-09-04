@@ -6,11 +6,13 @@ use crate::systems::game_map::{render_map_tile, setup_game_map, spawn_map_tiles}
 use crate::systems::player_spawn::spawn_player;
 use bevy::app::App;
 use bevy::prelude::{IntoSystemConfigs, OnTransition, Plugin, Update};
+use crate::resources::MapRenderCenterPosition;
 
 pub struct GameAppPlugin;
 
 impl Plugin for GameAppPlugin {
     fn build(&self, app: &mut App) {
+        app.insert_resource(MapRenderCenterPosition(None));
         app.add_systems(
             OnTransition { exited: GameState::InMainMenu, entered: GameState::PrepareGame },
             (

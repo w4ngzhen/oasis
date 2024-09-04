@@ -1,10 +1,11 @@
 use crate::components::position::Position;
-use crate::components::TileElement;
+use crate::components::role::Player;
+use crate::components::{CenterTilePosition, TileElement};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::core_module::game_map::themes::{tile_to_render_descriptor, TileRenderDescriptor};
 use crate::core_module::*;
 use crate::game_state::GameState;
-use crate::resources::CharsetAsset;
+use crate::resources::{CharsetAsset, MapRenderCenterPosition};
 use bevy::prelude::*;
 
 pub fn setup_game_map(mut commands: Commands) {
@@ -80,10 +81,23 @@ fn utils_spawn_map_tile_sprite(
     ));
 }
 /// 渲染地图内容，其核心是将相关TileElement放置到对应位置
-pub fn render_map_tile(mut q: Query<(&Position, &mut Transform), With<TileElement>>) {
+pub fn render_map_tile(
+    mut q: Query<(&Position, &mut Transform), With<TileElement>>,
+    query_player: Query<&Position, With<Player>>,
+    map_render_center_position: Res<MapRenderCenterPosition>,
+) {
+    let center_pos = if let Some(center) = map_render_center_position.0 {
+        center
+    } else if let Ok(player_pos) = query_player.get_single() {
+        *player_pos
+    } else {
+        Position::zero()
+    };
+    let base = Vec3::new(-(center_pos.x as f32) * TILE_SIZE, center_pos.y as f32 * TILE_SIZE, 0.);
     for (pos, mut transform) in q.iter_mut() {
         transform.scale = Vec3::new(TILE_SIZE, TILE_SIZE, 1.);
-        transform.translation =
-            Vec3::new(pos.x as f32 * TILE_SIZE, pos.y as f32 * TILE_SIZE, pos.z as f32);
+        let tile_pixel_pos =
+            Vec3::new(pos.x as f32 * TILE_SIZE, -(pos.y as f32) * TILE_SIZE, pos.z as f32);
+        transform.translation = tile_pixel_pos + base;
     }
 }

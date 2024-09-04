@@ -12,6 +12,10 @@ pub mod position;
 #[derive(Component)]
 pub struct TileElement;
 
+/// 用来呈现在地图镜头中心的元素的位置
+#[derive(Component)]
+pub struct CenterTilePosition(pub Position);
+
 /// 移动组件
 /// 该组件会在 移动系统 中消费
 #[derive(Component, Clone, Copy)]
