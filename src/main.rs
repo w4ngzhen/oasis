@@ -17,10 +17,8 @@ mod resources;
 mod systems;
 mod utils;
 
-use crate::core_module::*;
 use crate::plugins::plugin_game_app::GameAppPlugin;
 use crate::plugins::plugin_player::PlayerPlugin;
-use crate::systems::render::{position_translation, tile_element_size_scaling};
 use crate::systems::setup::setup_charset_assets;
 
 fn main() {
@@ -33,8 +31,8 @@ fn main() {
             }),
             ..Default::default()
         }))
+        // .insert_resource(ClearColor(Color::Srgba(Srgba::new(1., 0.5, 0.5, 1.))))
         .add_systems(Startup, setup_charset_assets)
-        .add_systems(PostUpdate, (tile_element_size_scaling, position_translation))
         .add_plugins(GameAppPlugin)
         .add_plugins(PlayerPlugin)
         .add_plugins((InPortalPlugin, InMainMenuPlugin, InPlayerConfigPlugin))

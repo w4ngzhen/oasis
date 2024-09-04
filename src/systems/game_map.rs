@@ -79,3 +79,11 @@ fn utils_spawn_map_tile_sprite(
         },
     ));
 }
+/// 渲染地图内容，其核心是将相关TileElement放置到对应位置
+pub fn render_map_tile(mut q: Query<(&Position, &mut Transform), With<TileElement>>) {
+    for (pos, mut transform) in q.iter_mut() {
+        transform.scale = Vec3::new(TILE_SIZE, TILE_SIZE, 1.);
+        transform.translation =
+            Vec3::new(pos.x as f32 * TILE_SIZE, pos.y as f32 * TILE_SIZE, pos.z as f32);
+    }
+}

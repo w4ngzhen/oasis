@@ -37,7 +37,6 @@ impl GameMapBuilder {
 
     fn build_rooms(&mut self) {
         let mut rng = RandGen::new(Some(123));
-        //
         let mut generated_rooms: Vec<TileRect> = Vec::new();
 
         for _ in 0..MAX_ROOMS {

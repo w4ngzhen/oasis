@@ -1,7 +1,8 @@
+use bevy::a11y::accesskit::Role::Portal;
 use crate::game_state::GameState;
 use crate::systems::game_camera::{spawn_game_camera, update_game_camera};
 use crate::systems::game_hud::spawn_game_hud;
-use crate::systems::game_map::{setup_game_map, spawn_map_tiles};
+use crate::systems::game_map::{render_map_tile, setup_game_map, spawn_map_tiles};
 use crate::systems::player_spawn::spawn_player;
 use bevy::app::App;
 use bevy::prelude::{IntoSystemConfigs, OnTransition, Plugin, Update};
@@ -19,6 +20,6 @@ impl Plugin for GameAppPlugin {
             )
                 .chain(),
         );
-        app.add_systems(Update, update_game_camera);
+        app.add_systems(Update, (update_game_camera, render_map_tile));
     }
 }

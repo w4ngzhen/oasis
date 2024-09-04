@@ -1,6 +1,7 @@
 use crate::components::{GameHudCamera, GameMapCamera};
 use bevy::prelude::*;
 use bevy::render::camera::Viewport;
+use bevy::render::view::RenderLayers;
 use bevy::window::{PrimaryWindow, WindowResized};
 
 pub fn spawn_game_camera(
@@ -13,7 +14,7 @@ pub fn spawn_game_camera(
     commands.spawn((
         GameMapCamera,
         Camera2dBundle {
-            camera: Camera { order: 1, viewport: Some(layout.left_viewport), ..default() },
+            camera: Camera { order: 0, viewport: Some(layout.left_viewport), ..default() },
             ..default()
         },
     ));
