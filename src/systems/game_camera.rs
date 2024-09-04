@@ -13,6 +13,7 @@ pub fn spawn_game_camera(
     // game map camera
     commands.spawn((
         GameMapCamera,
+        RenderLayers::layer(0),
         Camera2dBundle {
             camera: Camera { order: 0, viewport: Some(layout.left_viewport), ..default() },
             ..default()
@@ -21,6 +22,7 @@ pub fn spawn_game_camera(
     // game HUD camera
     commands.spawn((
         GameHudCamera,
+        RenderLayers::layer(63), // 多Camera，一定要注意渲染layer
         Camera2dBundle {
             camera: Camera { order: 999, viewport: Some(layout.right_viewport), ..default() },
             ..default()
