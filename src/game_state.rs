@@ -16,7 +16,9 @@ pub enum GameState {
     /// 游戏中
     InGaming,
     /// 游戏中 - 玩家回合
-    PlayerTurn,
+    PlayerAction,
+    MapExplore,
+    MonsterTurn,
     /// 暂停游戏
     Paused,
 }
