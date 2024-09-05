@@ -1,30 +1,38 @@
-use std::ops::Deref;
 use crate::components::position::Position;
 use crate::components::role::Player;
 use crate::components::Movement;
-use crate::resources::MapRenderCenterPosition;
+use crate::core_module::game_map::game_map_builder::GameMapBuilder;
+use crate::resources::MapCameraCenter;
 use bevy::prelude::*;
 
 /// 该系统仅处理用户输入
 pub fn player_input(
     mut commands: Commands,
-    mut keyboard_input: ResMut<ButtonInput<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     query: Query<(&Position, Entity), With<Player>>,
-    mut map_render_center_position: ResMut<MapRenderCenterPosition>,
+    mut map_camera_center: ResMut<MapCameraCenter>,
+    map_builder: Res<GameMapBuilder>,
 ) {
-    let key = keyboard_input.get_pressed().next().cloned();
-    if let Some(center_pos) = map_render_center_position.0 {
+    let key = keyboard_input.get_just_pressed().next().cloned();
+    // map camera lock
+    if let Some(center_pos) = map_camera_center.0 {
         let mut next_pos = center_pos.clone();
         if let Some(key) = key {
             match key {
-                KeyCode::ArrowLeft => next_pos.x -= 1,
-                KeyCode::ArrowRight => next_pos.x += 1,
-                KeyCode::ArrowUp => next_pos.y -= 1,
-                KeyCode::ArrowDown => next_pos.y += 1,
+                KeyCode::ArrowLeft => next_pos.x += 1,
+                KeyCode::ArrowRight => next_pos.x -= 1,
+                KeyCode::ArrowUp => next_pos.y += 1,
+                KeyCode::ArrowDown => next_pos.y -= 1,
+                KeyCode::KeyY => {
+                    map_camera_center.0 = None;
+                    return;
+                }
                 _ => {}
             }
         }
-        map_render_center_position.0 = Some(next_pos);
+        if map_builder.game_map.in_bounds(&next_pos) {
+            map_camera_center.0 = Some(next_pos);
+        }
         return;
     }
     let (curr_player_pos, player_entity) = query.single();
@@ -36,10 +44,8 @@ pub fn player_input(
             KeyCode::ArrowUp => new_pos.y -= 1,
             KeyCode::ArrowDown => new_pos.y += 1,
             KeyCode::KeyY => {
-                if map_render_center_position.0 == None {
-                    map_render_center_position.0 = Some(curr_player_pos.clone());
-                } else {
-                    map_render_center_position.0 = None;
+                if map_camera_center.0 == None {
+                    map_camera_center.0 = Some(curr_player_pos.clone());
                 }
             }
             _ => {}

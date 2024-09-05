@@ -1,11 +1,11 @@
 use crate::components::position::Position;
 use crate::components::role::Player;
-use crate::components::{CenterTilePosition, TileElement};
+use crate::components::TileElement;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::core_module::game_map::themes::{tile_to_render_descriptor, TileRenderDescriptor};
 use crate::core_module::*;
 use crate::game_state::GameState;
-use crate::resources::{CharsetAsset, MapRenderCenterPosition};
+use crate::resources::{CharsetAsset, MapCameraCenter};
 use bevy::prelude::*;
 
 pub fn setup_game_map(mut commands: Commands) {
@@ -84,9 +84,9 @@ fn utils_spawn_map_tile_sprite(
 pub fn render_map_tile(
     mut q: Query<(&Position, &mut Transform), With<TileElement>>,
     query_player: Query<&Position, With<Player>>,
-    map_render_center_position: Res<MapRenderCenterPosition>,
+    map_camera_center: Res<MapCameraCenter>,
 ) {
-    let center_pos = if let Some(center) = map_render_center_position.0 {
+    let center_pos = if let Some(center) = map_camera_center.0 {
         center
     } else if let Ok(player_pos) = query_player.get_single() {
         *player_pos

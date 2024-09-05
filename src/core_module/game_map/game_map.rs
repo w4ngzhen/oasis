@@ -2,7 +2,7 @@ use crate::components::position::Position;
 use crate::core_module::*;
 use bevy::prelude::*;
 
-const NUM_TILES: u64 = GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT;
+const NUM_TILES: i32 = GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum TileType {

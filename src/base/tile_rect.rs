@@ -3,21 +3,21 @@ use std::cmp::min;
 
 #[derive(PartialEq, Copy, Clone, Debug)]
 pub struct TileRect {
-    pub x: u64,
-    pub y: u64,
-    pub w: u64,
-    pub h: u64,
+    pub x: i32,
+    pub y: i32,
+    pub w: i32,
+    pub h: i32,
 }
 
 impl TileRect {
-    pub fn new(x: u64, y: u64, w: u64, h: u64) -> Self {
+    pub fn new(x: i32, y: i32, w: i32, h: i32) -> Self {
         TileRect { x, y, w, h }
     }
 
-    pub fn new_with_corner(x1: u64, y1: u64, x2: u64, y2: u64) -> Self {
+    pub fn new_with_corner(x1: i32, y1: i32, x2: i32, y2: i32) -> Self {
         let left = min(x1, x2);
         let top = min(y1, y2);
-        TileRect { x: left, y: top, w: x1.abs_diff(x2), h: y1.abs_diff(y2) }
+        TileRect { x: left, y: top, w: x1.abs_diff(x2) as i32, h: y1.abs_diff(y2) as i32 }
     }
 
     pub fn zero() -> Self {

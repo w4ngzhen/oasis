@@ -8,8 +8,8 @@ use rand::Rng;
 use std::cmp::{max, min};
 
 const MAX_ROOMS: usize = 10;
-const MIN_ROOM_SIZE: u64 = 6;
-const MAX_ROOM_SIZE: u64 = 10;
+const MIN_ROOM_SIZE: i32 = 6;
+const MAX_ROOM_SIZE: i32 = 10;
 
 #[derive(Resource)]
 pub struct GameMapBuilder {
@@ -90,7 +90,7 @@ impl GameMapBuilder {
         }
     }
 
-    fn apply_horizontal_tunnel(&mut self, x1: u64, x2: u64, y: u64) {
+    fn apply_horizontal_tunnel(&mut self, x1: i32, x2: i32, y: i32) {
         let map_tiles = &mut self.game_map.tiles;
         for x in min(x1, x2)..=max(x1, x2) {
             let idx = map_idx(x, y);
@@ -100,7 +100,7 @@ impl GameMapBuilder {
         }
     }
 
-    fn apply_vertical_tunnel(&mut self, y1: u64, y2: u64, x: u64) {
+    fn apply_vertical_tunnel(&mut self, y1: i32, y2: i32, x: i32) {
         let map_tiles = &mut self.game_map.tiles;
         for y in min(y1, y2)..=max(y1, y2) {
             let idx = map_idx(x, y);

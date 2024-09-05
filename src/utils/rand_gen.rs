@@ -7,24 +7,24 @@ pub struct RandGen {
 }
 
 impl RandGen {
-    pub fn new(seed: Option<u64>) -> RandGen {
+    pub fn new(seed: Option<i32>) -> RandGen {
         let rng_seed = if let Some(seed) = seed { seed } else { 0 };
-        let rng = Pcg64::seed_from_u64(rng_seed);
+        let rng = Pcg64::seed_from_u64(rng_seed as u64);
         RandGen { rng }
     }
 
     #[allow(unused)]
-    pub fn next_u64(&mut self) -> u64 {
-        self.rng.next_u64()
+    pub fn next_i32(&mut self) -> i32 {
+        self.rng.next_u32() as i32
     }
 
-    pub fn range(&mut self, from: u64, to: u64) -> u64 {
-        let range: Range<u64> = if from <= to { from..to } else { to..from };
+    pub fn range(&mut self, from: i32, to: i32) -> i32 {
+        let range: Range<i32> = if from <= to { from..to } else { to..from };
         self.rng.gen_range(range)
     }
 
-    pub fn roll_dice(&mut self, dice_count: u64, dice_size: u64) -> u64 {
-        let mut result = 0_u64;
+    pub fn roll_dice(&mut self, dice_count: i32, dice_size: i32) -> i32 {
+        let mut result = 0_i32;
         for _ in 0..dice_count {
             result += self.rng.gen_range(1..dice_size + 1);
         }

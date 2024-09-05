@@ -4,18 +4,14 @@ use std::ops;
 
 #[derive(Component, Copy, Clone, Debug, Eq, Hash, Ord, PartialOrd)]
 pub struct Position {
-    pub x: u64,
-    pub y: u64,
-    pub z: u64,
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
 }
 
 impl Position {
     pub fn zero() -> Self {
-       Self {
-           x: 0,
-           y: 0,
-           z: 0
-       }
+        Self { x: 0, y: 0, z: 0 }
     }
 }
 
@@ -37,20 +33,20 @@ impl PartialEq<Position> for Position {
 }
 
 impl Position {
-    pub fn new(x: u64, y: u64, z: u64) -> Self {
+    pub fn new(x: i32, y: i32, z: i32) -> Self {
         Self { x, y, z }
     }
 
-    pub fn new_with_2d(x: u64, y: u64) -> Self {
+    pub fn new_with_2d(x: i32, y: i32) -> Self {
         Self { x, y, z: 0 }
     }
 
-    pub fn from(data: [u64; 3]) -> Self {
+    pub fn from(data: [i32; 3]) -> Self {
         let [x, y, z] = data;
         Position::new(x, y, z)
     }
 
-    pub fn to_tuple(&self) -> (u64, u64, u64) {
+    pub fn to_tuple(&self) -> (i32, i32, i32) {
         (self.x, self.y, self.z)
     }
 }

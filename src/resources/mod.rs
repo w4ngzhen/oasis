@@ -7,5 +7,6 @@ pub struct CharsetAsset {
     pub texture: Handle<Image>,
 }
 
+/// 地图相机中心位置是那个tile位置
 #[derive(Resource)]
-pub struct MapRenderCenterPosition(pub Option<Position>);
+pub struct MapCameraCenter(pub Option<Position>);
