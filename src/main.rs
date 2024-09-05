@@ -1,4 +1,4 @@
-use crate::game_state::GameState;
+use crate::game_state::{GameState, PlayerTurnSubState};
 use crate::in_main_menu::InMainMenuPlugin;
 use crate::in_player_config::InPlayerConfigPlugin;
 use crate::in_portal::InPortalPlugin;
@@ -38,5 +38,6 @@ fn main() {
         .add_plugins((InPortalPlugin, InMainMenuPlugin, InPlayerConfigPlugin))
         // init_state一定要放在add_plugins之后
         .init_state::<GameState>()
+        .add_sub_state::<PlayerTurnSubState>()
         .run();
 }

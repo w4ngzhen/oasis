@@ -2,7 +2,7 @@ use crate::components::position::Position;
 use crate::components::role::Player;
 use crate::components::Movement;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
-use crate::game_state::GameState;
+use crate::game_state::{GameState, PlayerTurnSubState};
 use crate::resources::{MapCameraCenter, TileSize};
 use bevy::prelude::*;
 
@@ -11,11 +11,11 @@ pub fn player_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     query: Query<(&Position, Entity), With<Player>>,
     mut map_camera_center: ResMut<MapCameraCenter>,
-    mut next_state: ResMut<NextState<GameState>>,
+    mut next_state: ResMut<NextState<PlayerTurnSubState>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyY) {
         // enter explore state.
-        next_state.set(GameState::MapExplore)
+        next_state.set(PlayerTurnSubState::MapExploring)
     }
 
     let pressed_key = keyboard_input.get_just_pressed().next().cloned();
@@ -43,7 +43,7 @@ pub fn player_input(
     }
 }
 
-pub fn enter_explore(
+pub fn setup_map_exploring(
     query: Query<&Position, With<Player>>,
     mut map_camera_center: ResMut<MapCameraCenter>,
 ) {
@@ -55,7 +55,7 @@ pub fn player_explore_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut map_camera_center: ResMut<MapCameraCenter>,
     map_builder: Res<GameMapBuilder>,
-    mut next_state: ResMut<NextState<GameState>>,
+    mut next_state: ResMut<NextState<PlayerTurnSubState>>,
 ) {
     // check free camera
     let pressed_key = keyboard_input.get_just_pressed().next().cloned();
@@ -66,7 +66,7 @@ pub fn player_explore_input(
                 KeyCode::KeyY => {
                     map_camera_center.0 = None;
                     // back to player turn.
-                    next_state.set(GameState::PlayerAction);
+                    next_state.set(PlayerTurnSubState::PlayerAction);
                     return;
                 }
                 KeyCode::ArrowLeft => next_pos.x -= 1,

@@ -1,4 +1,4 @@
-use bevy::prelude::States;
+use bevy::prelude::*;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default, States)]
 pub enum GameState {
@@ -13,12 +13,17 @@ pub enum GameState {
     InGameSetting,
     /// 进入游戏前系统准备
     PrepareGame,
-    /// 游戏中
-    InGaming,
     /// 游戏中 - 玩家回合
-    PlayerAction,
-    MapExplore,
+    PlayerTurn,
     MonsterTurn,
     /// 暂停游戏
     Paused,
+}
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates)]
+#[source(GameState = GameState::PlayerTurn)]
+pub enum PlayerTurnSubState {
+    #[default]
+    PlayerAction,
+    MapExploring,
+    MapPicking,
 }
