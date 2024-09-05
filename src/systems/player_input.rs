@@ -2,27 +2,36 @@ use crate::components::position::Position;
 use crate::components::role::Player;
 use crate::components::Movement;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
-use crate::resources::MapCameraCenter;
+use crate::resources::{MapCameraCenter, TileSize};
 use bevy::prelude::*;
 
-/// 该系统仅处理用户输入
 pub fn player_input(
     mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     query: Query<(&Position, Entity), With<Player>>,
     mut map_camera_center: ResMut<MapCameraCenter>,
     map_builder: Res<GameMapBuilder>,
+    mut tile_size: ResMut<TileSize>,
 ) {
-    let key = keyboard_input.get_just_pressed().next().cloned();
-    // map camera lock
+    // scale map
+    if keyboard_input.just_pressed(KeyCode::Equal) {
+        tile_size.0 = (tile_size.0 + 2.).min(32.);
+        return;
+    }
+    if keyboard_input.just_pressed(KeyCode::Minus) {
+        tile_size.0 = (tile_size.0 - 2.).max(8.);
+        return;
+    }
+    // check free camera
+    let pressed_key = keyboard_input.get_just_pressed().next().cloned();
     if let Some(center_pos) = map_camera_center.0 {
         let mut next_pos = center_pos.clone();
-        if let Some(key) = key {
+        if let Some(key) = pressed_key {
             match key {
-                KeyCode::ArrowLeft => next_pos.x += 1,
-                KeyCode::ArrowRight => next_pos.x -= 1,
-                KeyCode::ArrowUp => next_pos.y += 1,
-                KeyCode::ArrowDown => next_pos.y -= 1,
+                KeyCode::ArrowLeft => next_pos.x -= 1,
+                KeyCode::ArrowRight => next_pos.x += 1,
+                KeyCode::ArrowUp => next_pos.y -= 1,
+                KeyCode::ArrowDown => next_pos.y += 1,
                 KeyCode::KeyY => {
                     map_camera_center.0 = None;
                     return;
@@ -35,9 +44,11 @@ pub fn player_input(
         }
         return;
     }
+
+    // check game input
     let (curr_player_pos, player_entity) = query.single();
     let mut new_pos = curr_player_pos.clone();
-    if let Some(key) = key {
+    if let Some(key) = pressed_key {
         match key {
             KeyCode::ArrowLeft => new_pos.x -= 1,
             KeyCode::ArrowRight => new_pos.x += 1,

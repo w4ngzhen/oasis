@@ -10,3 +10,7 @@ pub struct CharsetAsset {
 /// 地图相机中心位置是那个tile位置
 #[derive(Resource)]
 pub struct MapCameraCenter(pub Option<Position>);
+
+///
+#[derive(Resource)]
+pub struct TileSize(pub f32);

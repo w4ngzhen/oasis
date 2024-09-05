@@ -5,7 +5,7 @@ use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::core_module::game_map::themes::{tile_to_render_descriptor, TileRenderDescriptor};
 use crate::core_module::*;
 use crate::game_state::GameState;
-use crate::resources::{CharsetAsset, MapCameraCenter};
+use crate::resources::{CharsetAsset, MapCameraCenter, TileSize};
 use bevy::prelude::*;
 
 pub fn setup_game_map(mut commands: Commands) {
@@ -85,6 +85,7 @@ pub fn render_map_tile(
     mut q: Query<(&Position, &mut Transform), With<TileElement>>,
     query_player: Query<&Position, With<Player>>,
     map_camera_center: Res<MapCameraCenter>,
+    tile_size: Res<TileSize>
 ) {
     let center_pos = if let Some(center) = map_camera_center.0 {
         center
@@ -93,11 +94,12 @@ pub fn render_map_tile(
     } else {
         Position::zero()
     };
-    let base = Vec3::new(-(center_pos.x as f32) * TILE_SIZE, center_pos.y as f32 * TILE_SIZE, 0.);
+    let tile_size = tile_size.0;
+    let base = Vec3::new(-(center_pos.x as f32) * tile_size, center_pos.y as f32 * tile_size, 0.);
     for (pos, mut transform) in q.iter_mut() {
-        transform.scale = Vec3::new(TILE_SIZE, TILE_SIZE, 1.);
+        transform.scale = Vec3::new(tile_size, tile_size, 1.);
         let tile_pixel_pos =
-            Vec3::new(pos.x as f32 * TILE_SIZE, -(pos.y as f32) * TILE_SIZE, pos.z as f32);
+            Vec3::new(pos.x as f32 * tile_size, -(pos.y as f32) * tile_size, pos.z as f32);
         transform.translation = tile_pixel_pos + base;
     }
 }

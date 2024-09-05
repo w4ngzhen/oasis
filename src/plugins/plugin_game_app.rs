@@ -1,5 +1,5 @@
 use crate::game_state::GameState;
-use crate::resources::MapCameraCenter;
+use crate::resources::{MapCameraCenter, TileSize};
 use crate::systems::game_camera::{spawn_game_camera, update_game_camera};
 use crate::systems::game_hud::spawn_game_hud;
 use crate::systems::game_map::{render_map_tile, setup_game_map, spawn_map_tiles};
@@ -10,7 +10,7 @@ pub struct GameAppPlugin;
 
 impl Plugin for GameAppPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(MapCameraCenter(None));
+        app.insert_resource(MapCameraCenter(None)).insert_resource(TileSize(16.));
         app.add_systems(
             OnTransition { exited: GameState::InMainMenu, entered: GameState::PrepareGame },
             (
