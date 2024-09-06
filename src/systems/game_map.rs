@@ -72,7 +72,7 @@ fn utils_spawn_map_tile_sprite(
     // 背景色
     if let Some(bg_color) = tile_render_descriptor.bg_color {
         commands.spawn((
-            MapTileElement,
+            MapTileElement { color: bg_color },
             Position { x: pos.x, y: pos.y, z: 0 }, // z = 0, background.
             SpriteBundle {
                 sprite: Sprite {
@@ -87,7 +87,7 @@ fn utils_spawn_map_tile_sprite(
         ));
     }
     commands.spawn((
-        MapTileElement,
+        MapTileElement { color: tile_render_descriptor.color },
         Position { x: pos.x, y: pos.y, z: pos.z },
         SpriteBundle {
             visibility,
@@ -109,21 +109,45 @@ fn utils_spawn_map_tile_sprite(
 }
 /// 渲染地图内容，其核心是将相关TileElement放置到对应位置
 pub fn render_map_tile(
-    mut q: Query<(&Position, &mut Visibility, &mut Transform), With<MapTileElement>>,
+    mut q: Query<(
+        Entity,
+        &MapTileElement,
+        &Position,
+        &mut Visibility,
+        &mut Transform,
+        &mut Sprite,
+    )>,
     query_player: Query<(&Position, &FieldOfVision), With<Player>>,
     map_camera_center: Res<MapCameraCenter>,
+    mb: Res<GameMapBuilder>,
     tile_size: Res<TileSize>,
 ) {
     let (player_pos, player_fov) = query_player.single();
     let center_pos = if let Some(center) = map_camera_center.0 { center } else { *player_pos };
     let tile_size = tile_size.0;
     let base = Vec3::new(-(center_pos.x as f32) * tile_size, center_pos.y as f32 * tile_size, 0.);
-    for (ele_pos, mut visibility, mut transform) in q.iter_mut() {
-        *visibility = if player_fov.visible_tiles.iter().any(|pos| *pos == *ele_pos) {
-            Visibility::Visible
+    for (ele_entity, tile_ele, ele_pos, mut ele_visibility, mut transform, mut sprite) in
+        q.iter_mut()
+    {
+        let (visibility, is_visited_tile): (Visibility, bool) =
+            if player_fov.visible_tiles.iter().any(|pos| *pos == *ele_pos) {
+                (Visibility::Visible, false)
+            } else if mb.game_map.visited_tiles[map_idx(ele_pos.x, ele_pos.y)] {
+                if mb.game_map.occupation.values().any(|occupation| *occupation == ele_entity) {
+                    // you can see, but it's an object on map(not wall or floor)
+                    (Visibility::Hidden, true)
+                } else {
+                    (Visibility::Visible, true)
+                }
+            } else {
+                (Visibility::Hidden, false)
+            };
+        *ele_visibility = visibility;
+        if is_visited_tile {
+            sprite.color = Color::srgba(1., 1., 1., 0.3);
         } else {
-            Visibility::Hidden
-        };
+            sprite.color = tile_ele.color
+        }
         transform.scale = Vec3::new(tile_size, tile_size, 1.);
         let tile_pixel_pos = Vec3::new(
             ele_pos.x as f32 * tile_size,

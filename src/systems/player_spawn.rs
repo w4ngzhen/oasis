@@ -11,13 +11,11 @@ pub fn spawn_player(
     mut commands: Commands,
     atlas: Res<CharsetAsset>,
     mut mb: ResMut<GameMapBuilder>,
-    mut next_state: ResMut<NextState<GameState>>,
 ) {
     let player_start = mb.player_init_pos.clone();
 
     commands.spawn((
-        MapTileElement,
-        MapTileDrawable,
+        MapTileElement { color: Color::WHITE },
         Player,
         FieldOfVision { visible_tiles: Vec::new(), range: 8, is_dirty_data: true },
         Position { x: player_start.x, y: player_start.y, z: 2 },
