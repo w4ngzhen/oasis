@@ -11,7 +11,7 @@ pub struct TileRenderDescriptor {
 }
 
 impl TileRenderDescriptor {
-    fn new(tile_index: usize, color: Color, bg_color: Option<Color>) -> Self {
+    pub fn new(tile_index: usize, color: Color, bg_color: Option<Color>) -> Self {
         Self { tile_index, color, bg_color }
     }
 }
