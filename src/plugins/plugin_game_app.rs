@@ -1,13 +1,17 @@
+use crate::components::MapPickCursor;
 use crate::game_state::{GameState, PlayerTurnSubState};
 use crate::resources::{MapCameraCenter, TileSize};
 use crate::systems::game_camera::{spawn_game_camera, update_game_camera};
 use crate::systems::game_hud::spawn_game_hud;
-use crate::systems::game_map::{render_map_tile, setup_game_map, spawn_map_tiles};
+use crate::systems::game_map::{
+    render_map_tile, setup_game_map, spawn_map_pick_cursor, spawn_map_tiles,
+};
 use crate::systems::movement::movement;
 use crate::systems::player_input::{
-    player_explore_input, player_input, scale_map, setup_map_exploring,
+    player_action_input, player_explore_input, player_picking_input, scale_map, setup_map_exploring,
 };
 use crate::systems::player_spawn::spawn_player;
+use crate::utils::destroy_entity;
 use bevy::app::App;
 use bevy::prelude::{
     in_state, IntoSystemConfigs, NextState, OnEnter, OnTransition, Plugin, ResMut, Update,
@@ -34,13 +38,30 @@ impl Plugin for GameAppPlugin {
         );
         app.add_systems(
             Update,
-            (player_input, movement).chain().run_if(in_state(PlayerTurnSubState::PlayerAction)),
+            (player_action_input, movement)
+                .chain()
+                .run_if(in_state(PlayerTurnSubState::PlayerAction)),
         );
         app.add_systems(OnEnter(PlayerTurnSubState::MapExploring), setup_map_exploring)
             .add_systems(
                 Update,
                 player_explore_input.run_if(in_state(PlayerTurnSubState::MapExploring)),
             );
+        app.add_systems(
+            OnTransition {
+                exited: PlayerTurnSubState::PlayerAction,
+                entered: PlayerTurnSubState::MapPicking,
+            },
+            spawn_map_pick_cursor,
+        )
+        .add_systems(
+            OnTransition {
+                exited: PlayerTurnSubState::MapPicking,
+                entered: PlayerTurnSubState::PlayerAction,
+            },
+            destroy_entity::<MapPickCursor>,
+        )
+        .add_systems(Update, player_picking_input.run_if(in_state(PlayerTurnSubState::MapPicking)));
         app.add_systems(Update, (update_game_camera, render_map_tile, scale_map));
     }
 }

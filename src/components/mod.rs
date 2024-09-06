@@ -31,3 +31,7 @@ pub struct GameMapCamera;
 /// 游戏HUD模块Camera
 #[derive(Component, Clone, Copy)]
 pub struct GameHudCamera;
+
+/// 地图选择组件
+#[derive(Component, Clone, Copy)]
+pub struct MapPickCursor;

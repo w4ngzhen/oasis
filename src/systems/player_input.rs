@@ -1,21 +1,24 @@
 use crate::components::position::Position;
 use crate::components::role::Player;
-use crate::components::Movement;
+use crate::components::{MapPickCursor, Movement};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
-use crate::game_state::{GameState, PlayerTurnSubState};
+use crate::game_state::PlayerTurnSubState;
 use crate::resources::{MapCameraCenter, TileSize};
 use bevy::prelude::*;
 
-pub fn player_input(
+pub fn player_action_input(
     mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     query: Query<(&Position, Entity), With<Player>>,
-    mut map_camera_center: ResMut<MapCameraCenter>,
     mut next_state: ResMut<NextState<PlayerTurnSubState>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyY) {
         // enter explore state.
-        next_state.set(PlayerTurnSubState::MapExploring)
+        next_state.set(PlayerTurnSubState::MapExploring);
+        return;
+    } else if keyboard_input.just_pressed(KeyCode::KeyP) {
+        next_state.set(PlayerTurnSubState::MapPicking);
+        return;
     }
 
     let pressed_key = keyboard_input.get_just_pressed().next().cloned();
@@ -28,11 +31,6 @@ pub fn player_input(
             KeyCode::ArrowRight => new_pos.x += 1,
             KeyCode::ArrowUp => new_pos.y -= 1,
             KeyCode::ArrowDown => new_pos.y += 1,
-            KeyCode::KeyY => {
-                if map_camera_center.0 == None {
-                    map_camera_center.0 = Some(curr_player_pos.clone());
-                }
-            }
             _ => {}
         }
     }
@@ -63,7 +61,7 @@ pub fn player_explore_input(
         let mut next_pos = center_pos.clone();
         if let Some(key) = pressed_key {
             match key {
-                KeyCode::KeyY => {
+                KeyCode::KeyY | KeyCode::Escape => {
                     map_camera_center.0 = None;
                     // back to player turn.
                     next_state.set(PlayerTurnSubState::PlayerAction);
@@ -78,6 +76,38 @@ pub fn player_explore_input(
         }
         if map_builder.game_map.in_bounds(&next_pos) {
             map_camera_center.0 = Some(next_pos);
+        }
+    }
+}
+
+pub fn player_picking_input(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut query_pick_cursor: Query<&mut Position, With<MapPickCursor>>,
+    mut _map_camera: ResMut<MapCameraCenter>,
+    map_builder: Res<GameMapBuilder>,
+    mut next_state: ResMut<NextState<PlayerTurnSubState>>,
+) {
+    if let Ok(mut pick_cursor_pos) = query_pick_cursor.get_single_mut() {
+        let pressed_key = keyboard_input.get_just_pressed().next().cloned();
+        if let Some(key) = pressed_key {
+            let mut next_pick_cursor_pos = pick_cursor_pos.clone();
+            match key {
+                KeyCode::KeyP | KeyCode::Escape => {
+                    // back to player turn.
+                    next_state.set(PlayerTurnSubState::PlayerAction);
+                    return;
+                }
+                KeyCode::ArrowLeft => next_pick_cursor_pos.x -= 1,
+                KeyCode::ArrowRight => next_pick_cursor_pos.x += 1,
+                KeyCode::ArrowUp => next_pick_cursor_pos.y -= 1,
+                KeyCode::ArrowDown => next_pick_cursor_pos.y += 1,
+                _ => {}
+            }
+            if next_pick_cursor_pos != *pick_cursor_pos
+                && map_builder.game_map.in_bounds(&next_pick_cursor_pos)
+            {
+                *pick_cursor_pos = next_pick_cursor_pos;
+            }
         }
     }
 }

@@ -1,11 +1,12 @@
 use crate::components::position::Position;
 use crate::components::role::Player;
-use crate::components::TileElement;
+use crate::components::{MapPickCursor, TileElement};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::core_module::game_map::themes::{tile_to_render_descriptor, TileRenderDescriptor};
 use crate::core_module::*;
 use crate::game_state::GameState;
 use crate::resources::{CharsetAsset, MapCameraCenter, TileSize};
+use crate::utils::get_charset_index;
 use bevy::prelude::*;
 
 pub fn setup_game_map(mut commands: Commands) {
@@ -85,7 +86,7 @@ pub fn render_map_tile(
     mut q: Query<(&Position, &mut Transform), With<TileElement>>,
     query_player: Query<&Position, With<Player>>,
     map_camera_center: Res<MapCameraCenter>,
-    tile_size: Res<TileSize>
+    tile_size: Res<TileSize>,
 ) {
     let center_pos = if let Some(center) = map_camera_center.0 {
         center
@@ -101,5 +102,36 @@ pub fn render_map_tile(
         let tile_pixel_pos =
             Vec3::new(pos.x as f32 * tile_size, -(pos.y as f32) * tile_size, pos.z as f32);
         transform.translation = tile_pixel_pos + base;
+    }
+}
+
+pub fn spawn_map_pick_cursor(
+    mut commands: Commands,
+    query_player: Query<&Position, With<Player>>,
+    charset_asset: Res<CharsetAsset>,
+) {
+    if let Ok(player_pos) = query_player.get_single() {
+        commands.spawn((
+            MapPickCursor,
+            TileElement,
+            player_pos.clone(), // init pos same with player's.
+            SpriteBundle {
+                sprite: Sprite {
+                    color: Color::from(Srgba::new(1., 1., 1., 0.5)),
+                    // 所有的图块初始都是 1x1的尺寸
+                    // 我们会在相关系统中进行缩放处理
+                    custom_size: Some(Vec2::new(1., 1.)),
+                    ..Default::default()
+                },
+                texture: charset_asset.texture.clone(),
+                ..Default::default()
+            },
+            TextureAtlas {
+                layout: charset_asset.atlas.clone(),
+                index: get_charset_index(14, 0, 16),
+            },
+        ));
+    } else {
+        warn!("cannot get player position, so, we cannot spawn pick cursor");
     }
 }

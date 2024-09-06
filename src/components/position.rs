@@ -49,6 +49,7 @@ impl Position {
     pub fn to_tuple(&self) -> (i32, i32, i32) {
         (self.x, self.y, self.z)
     }
+
 }
 
 impl Display for Position {
