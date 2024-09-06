@@ -1,6 +1,7 @@
+use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position::Position;
 use crate::components::role::Player;
-use crate::components::{MapPickCursor, TileElement};
+use crate::components::{MapPickCursor, MapTileElement};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::core_module::game_map::themes::{tile_to_render_descriptor, TileRenderDescriptor};
 use crate::core_module::*;
@@ -32,6 +33,7 @@ pub fn spawn_map_tiles(
                     &charset_asset,
                     &render_descriptor,
                     &Position::new(x, y, 1),
+                    Visibility::Hidden, // default hidden
                 );
             }
         }
@@ -53,6 +55,7 @@ pub fn spawn_map_pick_cursor(
                 None,
             ),
             &Position { x: player_pos.x, y: player_pos.y, z: 999 },
+            Visibility::Visible,
         );
     } else {
         warn!("cannot get player position, so, we cannot spawn pick cursor");
@@ -64,11 +67,12 @@ fn utils_spawn_map_tile_sprite(
     charset_asset: &Res<CharsetAsset>,
     tile_render_descriptor: &TileRenderDescriptor,
     pos: &Position,
+    visibility: Visibility,
 ) {
     // 背景色
     if let Some(bg_color) = tile_render_descriptor.bg_color {
         commands.spawn((
-            TileElement,
+            MapTileElement,
             Position { x: pos.x, y: pos.y, z: 0 }, // z = 0, background.
             SpriteBundle {
                 sprite: Sprite {
@@ -83,9 +87,10 @@ fn utils_spawn_map_tile_sprite(
         ));
     }
     commands.spawn((
-        TileElement,
+        MapTileElement,
         Position { x: pos.x, y: pos.y, z: pos.z },
         SpriteBundle {
+            visibility,
             sprite: Sprite {
                 color: tile_render_descriptor.color,
                 // 所有的图块初始都是 1x1的尺寸
@@ -104,24 +109,27 @@ fn utils_spawn_map_tile_sprite(
 }
 /// 渲染地图内容，其核心是将相关TileElement放置到对应位置
 pub fn render_map_tile(
-    mut q: Query<(&Position, &mut Transform), With<TileElement>>,
-    query_player: Query<&Position, With<Player>>,
+    mut q: Query<(&Position, &mut Visibility, &mut Transform), With<MapTileElement>>,
+    query_player: Query<(&Position, &FieldOfVision), With<Player>>,
     map_camera_center: Res<MapCameraCenter>,
     tile_size: Res<TileSize>,
 ) {
-    let center_pos = if let Some(center) = map_camera_center.0 {
-        center
-    } else if let Ok(player_pos) = query_player.get_single() {
-        *player_pos
-    } else {
-        Position::zero()
-    };
+    let (player_pos, player_fov) = query_player.single();
+    let center_pos = if let Some(center) = map_camera_center.0 { center } else { *player_pos };
     let tile_size = tile_size.0;
     let base = Vec3::new(-(center_pos.x as f32) * tile_size, center_pos.y as f32 * tile_size, 0.);
-    for (pos, mut transform) in q.iter_mut() {
+    for (ele_pos, mut visibility, mut transform) in q.iter_mut() {
+        *visibility = if player_fov.visible_tiles.iter().any(|pos| *pos == *ele_pos) {
+            Visibility::Visible
+        } else {
+            Visibility::Hidden
+        };
         transform.scale = Vec3::new(tile_size, tile_size, 1.);
-        let tile_pixel_pos =
-            Vec3::new(pos.x as f32 * tile_size, -(pos.y as f32) * tile_size, pos.z as f32);
+        let tile_pixel_pos = Vec3::new(
+            ele_pos.x as f32 * tile_size,
+            -(ele_pos.y as f32) * tile_size,
+            ele_pos.z as f32,
+        );
         transform.translation = tile_pixel_pos + base;
     }
 }

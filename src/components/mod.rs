@@ -10,7 +10,12 @@ pub mod position;
 
 /// Map tile tag
 #[derive(Component)]
-pub struct TileElement;
+pub struct MapTileElement;
+
+/// 标识能否被绘制
+#[derive(Component)]
+pub struct MapTileDrawable;
+
 
 /// 用来呈现在地图镜头中心的元素的位置
 #[derive(Component)]

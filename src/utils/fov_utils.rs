@@ -3,12 +3,15 @@ use doryen_fov::{FovAlgorithm, FovRecursiveShadowCasting, MapData};
 use std::cmp::{max, min};
 
 /// 视野范围、地图信息，计算出能够看到的位置
-pub fn calc_fov(
+pub fn calc_fov<F>(
     observer_pos: &Position,
     range: i32,
     map_size: (i32, i32),
-    check_is_opacity: fn(&(i32, i32)) -> bool,
-) -> Vec<Position> {
+    check_is_opacity: F,
+) -> Vec<Position>
+where
+    F: Fn(i32, i32) -> bool,
+{
     let (map_w, map_h) = map_size;
     let x_range = (max(0, observer_pos.x - range), min(observer_pos.x + range, map_w));
     let y_range = (max(0, observer_pos.y - range), min(observer_pos.y + range, map_h));
@@ -17,7 +20,7 @@ pub fn calc_fov(
     let mut view_map_data = MapData::new(view_rect_w as usize, view_rect_h as usize);
     for origin_x in x_range.0..x_range.1 {
         for origin_y in y_range.0..y_range.1 {
-            if check_is_opacity(&(origin_x, origin_y)) {
+            if check_is_opacity(origin_x, origin_y) {
                 let offset_x = origin_x - x_range.0;
                 let offset_y = origin_y - y_range.0;
                 view_map_data.set_transparent(offset_x as usize, offset_y as usize, false);

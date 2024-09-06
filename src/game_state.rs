@@ -13,14 +13,15 @@ pub enum GameState {
     InGameSetting,
     /// 进入游戏前系统准备
     PrepareGame,
-    /// 游戏中 - 玩家回合
-    PlayerTurn,
-    MonsterTurn,
+    /// 游戏
+    InGaming,
     /// 暂停游戏
     Paused,
 }
+
+
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates)]
-#[source(GameState = GameState::PlayerTurn)]
+#[source(GameState = GameState::InGaming)]
 pub enum PlayerTurnSubState {
     #[default]
     PlayerAction,

@@ -38,8 +38,8 @@ impl GameMap {
         self.in_bounds(position) && (self.tiles[map_idx(position.x, position.y)] == TileType::Floor)
     }
 
-    pub fn is_tile_occupied<T: Into<Position>>(&self, position: &Position) -> bool {
-        self.in_bounds(position) && self.occupation[map_idx(position.x, position.y)] != None
+    pub fn is_tile_opacity<T: Into<Position>>(&self, position: &Position) -> bool {
+        self.in_bounds(position) && self.tiles[map_idx(position.x, position.y)] == TileType::Wall
     }
 
     pub fn try_idx(&self, position: &Position) -> Option<usize> {

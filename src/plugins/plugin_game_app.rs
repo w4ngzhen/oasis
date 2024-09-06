@@ -1,6 +1,7 @@
 use crate::components::MapPickCursor;
 use crate::game_state::{GameState, PlayerTurnSubState};
 use crate::resources::{MapCameraCenter, TileSize};
+use crate::systems::fov::fov;
 use crate::systems::game_camera::{spawn_game_camera, update_game_camera};
 use crate::systems::game_hud::spawn_game_hud;
 use crate::systems::game_map::{
@@ -33,7 +34,7 @@ impl Plugin for GameAppPlugin {
                 .chain(),
         );
         app.add_systems(
-            OnTransition { exited: GameState::PrepareGame, entered: GameState::PlayerTurn },
+            OnTransition { exited: GameState::PrepareGame, entered: GameState::InGaming },
             spawn_player,
         );
         app.add_systems(
@@ -62,10 +63,14 @@ impl Plugin for GameAppPlugin {
             destroy_entity::<MapPickCursor>,
         )
         .add_systems(Update, player_picking_input.run_if(in_state(PlayerTurnSubState::MapPicking)));
-        app.add_systems(Update, (update_game_camera, render_map_tile, scale_map));
+        app.add_systems(
+            Update,
+            (update_game_camera, render_map_tile, scale_map, fov)
+                .run_if(in_state(GameState::InGaming)),
+        );
     }
 }
 
 fn finish_prepare_game(mut next_state: ResMut<NextState<GameState>>) {
-    next_state.set(GameState::PlayerTurn);
+    next_state.set(GameState::InGaming);
 }
