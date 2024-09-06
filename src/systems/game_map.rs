@@ -114,7 +114,7 @@ pub fn spawn_map_pick_cursor(
         commands.spawn((
             MapPickCursor,
             TileElement,
-            player_pos.clone(), // init pos same with player's.
+            Position { x: player_pos.x, y: player_pos.y, z: 999 }, // init pos same with player's.
             SpriteBundle {
                 sprite: Sprite {
                     color: Color::from(Srgba::new(1., 1., 1., 0.5)),
