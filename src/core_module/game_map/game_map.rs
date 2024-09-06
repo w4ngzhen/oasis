@@ -38,7 +38,7 @@ impl GameMap {
         self.in_bounds(position) && (self.tiles[map_idx(position.x, position.y)] == TileType::Floor)
     }
 
-    pub fn is_tile_opacity<T: Into<Position>>(&self, position: &Position) -> bool {
+    pub fn is_tile_opacity(&self, position: &Position) -> bool {
         self.in_bounds(position) && self.tiles[map_idx(position.x, position.y)] == TileType::Wall
     }
 

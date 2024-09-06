@@ -12,14 +12,14 @@ pub fn movement(
 ) {
     for (movement_entity, movement) in query_movement.iter() {
         let new_dest = movement.destination;
-        if let Ok((_mover_entity, mut fov, mut mover_curr_pos)) =
+        if let Ok((_mover_entity, mut mover_fov, mut mover_curr_pos)) =
             query_mover.get_mut(movement.entity)
         {
             // check the movement is valid
-            if map.game_map.in_bounds(&new_dest) {
+            if map.game_map.in_bounds(&new_dest) && !map.game_map.is_tile_opacity(&new_dest) {
                 mover_curr_pos.x = new_dest.x;
                 mover_curr_pos.y = new_dest.y;
-                fov.is_dirty_data = true;
+                mover_fov.is_dirty_data = true;
             }
         }
         // delete movement Component

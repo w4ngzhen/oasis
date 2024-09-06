@@ -11,7 +11,7 @@ pub fn fov(mb: Res<GameMapBuilder>, mut views_query: Query<(&Position, &mut Fiel
             &pos,
             fov.range,
             (GAME_MAP_TILE_WIDTH, GAME_MAP_TILE_HEIGHT),
-            |x: i32, y: i32| mb.game_map.is_tile_opacity::<Position>(&Position::new(x, y, 0)),
+            |x: i32, y: i32| mb.game_map.is_tile_opacity(&Position::new(x, y, 0)),
         );
         fov.visible_tiles = visible_tiles;
         fov.is_dirty_data = false;
