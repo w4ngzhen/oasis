@@ -43,7 +43,7 @@ pub fn setup_main_menu(mut commands: Commands) {
 fn create_menu_button(builder: &mut ChildBuilder, action: MenuButtonAction, button_label: &str) {
     let button_text_style = TextStyle { font_size: 40.0, color: BUTTON_NORMAL_COLOR, ..default() };
     builder.spawn((action, ButtonBundle { ..default() })).with_children(|p| {
-        p.spawn(TextBundle::from_section(button_label.clone(), button_text_style));
+        p.spawn(TextBundle::from_section(button_label, button_text_style));
     });
 }
 

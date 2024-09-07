@@ -12,6 +12,7 @@ pub mod position;
 #[derive(Component)]
 pub struct MapTileElement {
     pub color: Color,
+    pub is_background: bool,
 }
 
 /// 标识能否被绘制

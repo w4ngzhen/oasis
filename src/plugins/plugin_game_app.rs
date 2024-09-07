@@ -7,6 +7,7 @@ use crate::systems::game_hud::spawn_game_hud;
 use crate::systems::game_map::{
     render_map_tile, setup_game_map, spawn_map_pick_cursor, spawn_map_tiles,
 };
+use crate::systems::monster_spawn::spawn_monster;
 use crate::systems::movement::movement;
 use crate::systems::player_input::{
     player_action_input, player_explore_input, player_picking_input, scale_map, setup_map_exploring,
@@ -35,7 +36,7 @@ impl Plugin for GameAppPlugin {
         );
         app.add_systems(
             OnTransition { exited: GameState::PrepareGame, entered: GameState::InGaming },
-            spawn_player,
+            (spawn_player, spawn_monster),
         );
         app.add_systems(
             Update,

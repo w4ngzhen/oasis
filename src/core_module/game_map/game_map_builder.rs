@@ -1,5 +1,4 @@
 use crate::base::tile_rect::TileRect;
-use crate::components::position::Position;
 use crate::core_module::game_map::game_map::{GameMap, TileType};
 use crate::core_module::*;
 use crate::utils::rand_gen::RandGen;
@@ -14,7 +13,6 @@ const MAX_ROOM_SIZE: i32 = 10;
 #[derive(Resource)]
 pub struct GameMapBuilder {
     pub game_map: GameMap,
-    pub player_init_pos: Position,
     pub rooms: Vec<TileRect>,
 }
 
@@ -22,12 +20,10 @@ impl GameMapBuilder {
     pub fn new() -> Self {
         let mut mb = GameMapBuilder {
             game_map: GameMap::new(),
-            player_init_pos: Position::zero(),
             rooms: Vec::new(),
         };
         mb.fill(TileType::Wall);
         mb.build_rooms();
-        mb.setup_player_init_pos();
         mb
     }
 
@@ -71,12 +67,6 @@ impl GameMapBuilder {
         }
 
         self.rooms = generated_rooms;
-    }
-
-    fn setup_player_init_pos(&mut self) {
-        if let Some(first_room) = self.rooms.first() {
-            self.player_init_pos = first_room.center().clone();
-        }
     }
 
     fn apply_room_to_map(&mut self, room: &TileRect) {

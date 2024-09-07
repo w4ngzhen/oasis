@@ -6,3 +6,4 @@ pub(crate) mod setup;
 pub(crate) mod game_hud;
 pub(crate) mod game_camera;
 pub(crate) mod fov;
+pub(crate) mod monster_spawn;

@@ -72,7 +72,7 @@ fn utils_spawn_map_tile_sprite(
     // 背景色
     if let Some(bg_color) = tile_render_descriptor.bg_color {
         commands.spawn((
-            MapTileElement { color: bg_color },
+            MapTileElement { color: bg_color, is_background: true },
             Position { x: pos.x, y: pos.y, z: 0 }, // z = 0, background.
             SpriteBundle {
                 sprite: Sprite {
@@ -87,7 +87,7 @@ fn utils_spawn_map_tile_sprite(
         ));
     }
     commands.spawn((
-        MapTileElement { color: tile_render_descriptor.color },
+        MapTileElement { color: tile_render_descriptor.color, is_background: false },
         Position { x: pos.x, y: pos.y, z: pos.z },
         SpriteBundle {
             visibility,
@@ -137,7 +137,11 @@ pub fn render_map_tile(
                     // you can see, but it's an object on map(not wall or floor)
                     (Visibility::Hidden, true)
                 } else {
-                    (Visibility::Visible, true)
+                    if tile_ele.is_background {
+                        (Visibility::Hidden, true)
+                    } else {
+                        (Visibility::Visible, true)
+                    }
                 }
             } else {
                 (Visibility::Hidden, false)

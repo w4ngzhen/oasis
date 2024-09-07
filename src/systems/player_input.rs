@@ -23,21 +23,22 @@ pub fn player_action_input(
 
     let pressed_key = keyboard_input.get_just_pressed().next().cloned();
     // check game input
-    let (curr_player_pos, player_entity) = query.single();
-    let mut new_pos = curr_player_pos.clone();
-    if let Some(key) = pressed_key {
-        match key {
-            KeyCode::ArrowLeft => new_pos.x -= 1,
-            KeyCode::ArrowRight => new_pos.x += 1,
-            KeyCode::ArrowUp => new_pos.y -= 1,
-            KeyCode::ArrowDown => new_pos.y += 1,
-            _ => {}
+    if let Ok((curr_player_pos, player_entity)) = query.get_single() {
+        let mut new_pos = curr_player_pos.clone();
+        if let Some(key) = pressed_key {
+            match key {
+                KeyCode::ArrowLeft => new_pos.x -= 1,
+                KeyCode::ArrowRight => new_pos.x += 1,
+                KeyCode::ArrowUp => new_pos.y -= 1,
+                KeyCode::ArrowDown => new_pos.y += 1,
+                _ => {}
+            }
         }
-    }
-    if new_pos != *curr_player_pos {
-        // 在本系统中，我们仅仅处理玩家输入，不进行移动的操作，
-        // 而是产生一个移动组件，在另一个专门处理移动系统中来进行移动
-        commands.spawn(Movement { entity: player_entity, destination: new_pos });
+        if new_pos != *curr_player_pos {
+            // 在本系统中，我们仅仅处理玩家输入，不进行移动的操作，
+            // 而是产生一个移动组件，在另一个专门处理移动系统中来进行移动
+            commands.spawn(Movement { entity: player_entity, destination: new_pos });
+        }
     }
 }
 
