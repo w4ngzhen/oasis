@@ -1,8 +1,9 @@
 use bevy::prelude::Component;
 use std::fmt::{Display, Formatter};
+use std::hash::{Hash, Hasher};
 use std::ops;
 
-#[derive(Component, Copy, Clone, Debug, Eq, Hash, Ord, PartialOrd)]
+#[derive(Component, Copy, Clone, Debug, Eq, Ord, PartialOrd)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
@@ -32,6 +33,14 @@ impl PartialEq<Position> for Position {
     }
 }
 
+impl Hash for Position {
+    /// 因为我们会使用Position作为键，在我们2D的场景下，只需要x、y保持一致即可
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let val = (self.x, self.y);
+        val.hash(state);
+    }
+}
+
 impl Position {
     pub fn new(x: i32, y: i32, z: i32) -> Self {
         Self { x, y, z }
@@ -49,7 +58,6 @@ impl Position {
     pub fn to_tuple(&self) -> (i32, i32, i32) {
         (self.x, self.y, self.z)
     }
-
 }
 
 impl Display for Position {

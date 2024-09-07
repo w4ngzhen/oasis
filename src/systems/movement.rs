@@ -16,7 +16,10 @@ pub fn movement(
             query_mover.get_mut(movement.entity)
         {
             // check the movement is valid
-            if map.game_map.in_bounds(&new_dest) && !map.game_map.is_tile_opacity(&new_dest) {
+            if map.game_map.in_bounds(&new_dest)
+                && !map.game_map.is_tile_opacity(&new_dest)
+                && map.game_map.occupation.get(&new_dest).is_none()
+            {
                 mover_curr_pos.x = new_dest.x;
                 mover_curr_pos.y = new_dest.y;
                 mover_fov.is_dirty_data = true;
