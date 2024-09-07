@@ -1,4 +1,4 @@
-use crate::components::position::Position;
+use crate::components::position_2d::Position2d;
 use std::cmp::min;
 
 #[derive(PartialEq, Copy, Clone, Debug)]
@@ -24,12 +24,12 @@ impl TileRect {
         Self::new(0, 0, 0, 0)
     }
 
-    pub fn left_top(&self) -> Position {
-        Position::from([self.x, self.y, 0])
+    pub fn left_top(&self) -> Position2d {
+        Position2d::from([self.x, self.y])
     }
 
-    pub fn right_bottom(&self) -> Position {
-        Position::from([self.x + self.w, self.y + self.h, 0])
+    pub fn right_bottom(&self) -> Position2d {
+        Position2d::from([self.x + self.w, self.y + self.h])
     }
 
     pub fn intersect(&self, other: &TileRect) -> bool {
@@ -44,21 +44,21 @@ impl TileRect {
         x1 <= other_x2 && x2 >= other_x1 && y1 <= other_y2 && y2 >= other_y1
     }
 
-    pub fn center(&self) -> Position {
+    pub fn center(&self) -> Position2d {
         let x1 = self.x;
         let y1 = self.y;
         let x2 = x1 + self.w;
         let y2 = y1 + self.h;
-        Position::from([(x1 + x2) / 2, (y1 + y2) / 2, 0])
+        Position2d::from([(x1 + x2) / 2, (y1 + y2) / 2])
     }
 
     pub fn for_each<F>(&self, mut f: F)
     where
-        F: FnMut(Position),
+        F: FnMut(Position2d),
     {
         for y in self.y..self.y + self.h {
             for x in self.x..self.x + self.h {
-                f(Position::new_with_2d(x, y));
+                f(Position2d::new_with_2d(x, y));
             }
         }
     }

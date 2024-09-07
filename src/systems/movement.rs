@@ -1,5 +1,5 @@
 use crate::components::field_of_vision::FieldOfVision;
-use crate::components::position::Position;
+use crate::components::position_2d::Position2d;
 use crate::components::Movement;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use bevy::prelude::*;
@@ -7,7 +7,7 @@ use bevy::prelude::*;
 pub fn movement(
     mut commands: Commands,
     query_movement: Query<(Entity, &Movement)>,
-    mut query_mover: Query<(Entity, &mut FieldOfVision, &mut Position)>,
+    mut query_mover: Query<(Entity, &mut FieldOfVision, &mut Position2d)>,
     map: Res<GameMapBuilder>,
 ) {
     for (movement_entity, movement) in query_movement.iter() {

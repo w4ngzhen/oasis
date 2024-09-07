@@ -1,14 +1,14 @@
-use crate::components::position::Position;
+use crate::components::position_2d::Position2d;
 use doryen_fov::{FovAlgorithm, FovRecursiveShadowCasting, MapData};
 use std::cmp::{max, min};
 
 /// 视野范围、地图信息，计算出能够看到的位置
 pub fn calc_fov<F>(
-    observer_pos: &Position,
+    observer_pos: &Position2d,
     range: i32,
     map_size: (i32, i32),
     check_is_opacity: F,
-) -> Vec<Position>
+) -> Vec<Position2d>
 where
     F: Fn(i32, i32) -> bool,
 {
@@ -37,13 +37,13 @@ where
         range as usize,
         true,
     );
-    let mut visible_points: Vec<Position> = Vec::new();
+    let mut visible_points: Vec<Position2d> = Vec::new();
     for origin_x in x_range.0..x_range.1 {
         for origin_y in y_range.0..y_range.1 {
             let offset_x = (origin_x - x_range.0) as usize;
             let offset_y = (origin_y - y_range.0) as usize;
             if view_map_data.is_in_fov(offset_x, offset_y) {
-                visible_points.push(Position::from([origin_x, origin_y, 0]));
+                visible_points.push(Position2d::from([origin_x, origin_y]));
             }
         }
     }

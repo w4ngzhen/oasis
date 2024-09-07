@@ -1,4 +1,4 @@
-use crate::components::position::Position;
+use crate::components::position_2d::Position2d;
 use crate::core_module::*;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
@@ -19,7 +19,7 @@ pub struct GameMap {
     /// 见过的tile
     pub visited_tiles: Vec<bool>,
     /// 地图上某些地方占据的东西是实体Entity
-    pub occupation: HashMap<Position, Entity>,
+    pub occupation: HashMap<Position2d, Entity>,
 }
 
 impl GameMap {
@@ -31,22 +31,22 @@ impl GameMap {
         }
     }
 
-    pub fn in_bounds(&self, position: &Position) -> bool {
+    pub fn in_bounds(&self, position: &Position2d) -> bool {
         position.x >= 0
             && position.x < GAME_MAP_TILE_WIDTH
             && position.y >= 0
             && position.y < GAME_MAP_TILE_HEIGHT
     }
 
-    pub fn can_enter_tile<T: Into<Position>>(&self, position: &Position) -> bool {
+    pub fn can_enter_tile<T: Into<Position2d>>(&self, position: &Position2d) -> bool {
         self.in_bounds(position) && (self.tiles[map_idx(position.x, position.y)] == TileType::Floor)
     }
 
-    pub fn is_tile_opacity(&self, position: &Position) -> bool {
+    pub fn is_tile_opacity(&self, position: &Position2d) -> bool {
         self.in_bounds(position) && self.tiles[map_idx(position.x, position.y)] == TileType::Wall
     }
 
-    pub fn try_idx(&self, position: &Position) -> Option<usize> {
+    pub fn try_idx(&self, position: &Position2d) -> Option<usize> {
         if !self.in_bounds(position) {
             None
         } else {

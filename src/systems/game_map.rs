@@ -1,5 +1,5 @@
 use crate::components::field_of_vision::FieldOfVision;
-use crate::components::position::Position;
+use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::role::Player;
 use crate::components::{MapPickCursor, MapTileElement};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
@@ -32,7 +32,8 @@ pub fn spawn_map_tiles(
                     &mut commands,
                     &charset_asset,
                     &render_descriptor,
-                    &Position::new(x, y, 1),
+                    &Position2d::new(x, y),
+                    1,
                     Visibility::Hidden, // default hidden
                 );
             }
@@ -42,7 +43,7 @@ pub fn spawn_map_tiles(
 
 pub fn spawn_map_pick_cursor(
     mut commands: Commands,
-    query_player: Query<&Position, With<Player>>,
+    query_player: Query<&Position2d, With<Player>>,
     charset_asset: Res<CharsetAsset>,
 ) {
     if let Ok(player_pos) = query_player.get_single() {
@@ -54,7 +55,8 @@ pub fn spawn_map_pick_cursor(
                 Color::srgba(1., 1., 1., 0.5),
                 None,
             ),
-            &Position { x: player_pos.x, y: player_pos.y, z: 999 },
+            &Position2d { x: player_pos.x, y: player_pos.y },
+            999,
             Visibility::Visible,
         );
     } else {
@@ -66,14 +68,16 @@ fn utils_spawn_map_tile_sprite(
     commands: &mut Commands,
     charset_asset: &Res<CharsetAsset>,
     tile_render_descriptor: &TileRenderDescriptor,
-    pos: &Position,
+    pos: &Position2d,
+    z_index: i32,
     visibility: Visibility,
 ) {
     // 背景色
     if let Some(bg_color) = tile_render_descriptor.bg_color {
         commands.spawn((
             MapTileElement { color: bg_color, is_background: true },
-            Position { x: pos.x, y: pos.y, z: 0 }, // z = 0, background.
+            Position2d { x: pos.x, y: pos.y }, // z = 0, background.
+            PositionZIndex(0), // background always.
             SpriteBundle {
                 sprite: Sprite {
                     color: bg_color,
@@ -88,7 +92,8 @@ fn utils_spawn_map_tile_sprite(
     }
     commands.spawn((
         MapTileElement { color: tile_render_descriptor.color, is_background: false },
-        Position { x: pos.x, y: pos.y, z: pos.z },
+        Position2d { x: pos.x, y: pos.y },
+        PositionZIndex(z_index),
         SpriteBundle {
             visibility,
             sprite: Sprite {
@@ -112,12 +117,13 @@ pub fn render_map_tile(
     mut q: Query<(
         Entity,
         &MapTileElement,
-        &Position,
+        &Position2d,
+        &PositionZIndex,
         &mut Visibility,
         &mut Transform,
         &mut Sprite,
     )>,
-    query_player: Query<(&Position, &FieldOfVision), With<Player>>,
+    query_player: Query<(&Position2d, &FieldOfVision), With<Player>>,
     map_camera_center: Res<MapCameraCenter>,
     mb: Res<GameMapBuilder>,
     tile_size: Res<TileSize>,
@@ -126,7 +132,7 @@ pub fn render_map_tile(
     let center_pos = if let Some(center) = map_camera_center.0 { center } else { *player_pos };
     let tile_size = tile_size.0;
     let base = Vec3::new(-(center_pos.x as f32) * tile_size, center_pos.y as f32 * tile_size, 0.);
-    for (ele_entity, tile_ele, ele_pos, mut ele_visibility, mut transform, mut sprite) in
+    for (ele_entity, tile_ele, ele_pos, ele_z_idx, mut ele_visibility, mut transform, mut sprite) in
         q.iter_mut()
     {
         let (visibility, is_visited_tile): (Visibility, bool) =
@@ -156,7 +162,7 @@ pub fn render_map_tile(
         let tile_pixel_pos = Vec3::new(
             ele_pos.x as f32 * tile_size,
             -(ele_pos.y as f32) * tile_size,
-            ele_pos.z as f32,
+            ele_z_idx.0 as f32,
         );
         transform.translation = tile_pixel_pos + base;
     }

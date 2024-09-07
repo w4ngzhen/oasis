@@ -1,4 +1,4 @@
-use crate::components::position::Position;
+use crate::components::position_2d::Position2d;
 use crate::components::role::Player;
 use crate::components::{MapPickCursor, Movement};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
@@ -9,7 +9,7 @@ use bevy::prelude::*;
 pub fn player_action_input(
     mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    query: Query<(&Position, Entity), With<Player>>,
+    query: Query<(&Position2d, Entity), With<Player>>,
     mut next_state: ResMut<NextState<PlayerTurnSubState>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyY) {
@@ -43,7 +43,7 @@ pub fn player_action_input(
 }
 
 pub fn setup_map_exploring(
-    query: Query<&Position, With<Player>>,
+    query: Query<&Position2d, With<Player>>,
     mut map_camera_center: ResMut<MapCameraCenter>,
 ) {
     if let Ok(player_pos) = query.get_single() {
@@ -83,7 +83,7 @@ pub fn player_explore_input(
 
 pub fn player_picking_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut query_pick_cursor: Query<&mut Position, With<MapPickCursor>>,
+    mut query_pick_cursor: Query<&mut Position2d, With<MapPickCursor>>,
     mut _map_camera: ResMut<MapCameraCenter>,
     map_builder: Res<GameMapBuilder>,
     mut next_state: ResMut<NextState<PlayerTurnSubState>>,

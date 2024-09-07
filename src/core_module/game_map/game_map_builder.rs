@@ -18,10 +18,7 @@ pub struct GameMapBuilder {
 
 impl GameMapBuilder {
     pub fn new() -> Self {
-        let mut mb = GameMapBuilder {
-            game_map: GameMap::new(),
-            rooms: Vec::new(),
-        };
+        let mut mb = GameMapBuilder { game_map: GameMap::new(), rooms: Vec::new() };
         mb.fill(TileType::Wall);
         mb.build_rooms();
         mb
@@ -50,8 +47,8 @@ impl GameMapBuilder {
             if ok {
                 self.apply_room_to_map(&new_room);
                 if !generated_rooms.is_empty() {
-                    let (new_x, new_y, _) = new_room.center().to_tuple();
-                    let (prev_x, prev_y, _) =
+                    let (new_x, new_y) = new_room.center().to_tuple();
+                    let (prev_x, prev_y) =
                         generated_rooms[generated_rooms.len() - 1].center().to_tuple();
                     if rng.range(0, 2) == 1 {
                         self.apply_horizontal_tunnel(prev_x, new_x, prev_y);
