@@ -1,6 +1,9 @@
 use crate::components::MapPickCursor;
 use crate::game_state::{GameState, PlayerTurnSubState};
+use crate::resources::game_log::GameLog;
 use crate::resources::{MapCameraCenter, TileSize};
+use crate::systems::combat::handle_combat;
+use crate::systems::destroy_object::handle_object_destroy;
 use crate::systems::fov::fov;
 use crate::systems::game_camera::{spawn_game_camera, update_game_camera};
 use crate::systems::game_hud::spawn_game_hud;
@@ -23,7 +26,9 @@ pub struct GameAppPlugin;
 
 impl Plugin for GameAppPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(MapCameraCenter(None)).insert_resource(TileSize(16.));
+        app.insert_resource(MapCameraCenter(None))
+            .insert_resource(TileSize(16.))
+            .insert_resource(GameLog::new());
         app.add_systems(
             OnTransition { exited: GameState::InMainMenu, entered: GameState::PrepareGame },
             (
@@ -37,6 +42,10 @@ impl Plugin for GameAppPlugin {
         app.add_systems(
             OnTransition { exited: GameState::PrepareGame, entered: GameState::InGaming },
             (spawn_player, spawn_monster),
+        );
+        app.add_systems(
+            Update,
+            (handle_combat, handle_object_destroy).run_if(in_state(GameState::InGaming)),
         );
         app.add_systems(
             Update,

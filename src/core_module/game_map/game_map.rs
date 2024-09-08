@@ -46,6 +46,18 @@ impl GameMap {
         self.in_bounds(position) && self.tiles[map_idx(position.x, position.y)] == TileType::Wall
     }
 
+    pub fn remove_entity(&mut self, target_entity: Entity) {
+        let mut target_pos: Option<Position2d> = None;
+        for (pos, entity) in self.occupation.iter_mut() {
+            if *entity == target_entity {
+                target_pos = Some(pos.clone());
+            }
+        }
+        if let Some(pos) = target_pos {
+            self.occupation.remove(&pos);
+        }
+    }
+
     pub fn try_idx(&self, position: &Position2d) -> Option<usize> {
         if !self.in_bounds(position) {
             None

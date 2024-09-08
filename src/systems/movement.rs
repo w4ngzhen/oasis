@@ -1,5 +1,7 @@
+use crate::components::attack::Attack;
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position_2d::Position2d;
+use crate::components::role::{Monster, Player};
 use crate::components::Movement;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use bevy::prelude::*;
@@ -12,7 +14,7 @@ pub fn movement(
 ) {
     for (movement_entity, movement) in query_movement.iter() {
         let new_dest = movement.destination;
-        if let Ok((_mover_entity, mut mover_fov, mut mover_curr_pos)) =
+        if let Ok((mover_entity, mut mover_fov, mut mover_curr_pos)) =
             query_mover.get_mut(movement.entity)
         {
             // check the movement is valid
@@ -23,6 +25,10 @@ pub fn movement(
                 mover_curr_pos.x = new_dest.x;
                 mover_curr_pos.y = new_dest.y;
                 mover_fov.is_dirty_data = true;
+            } else if let Some(target) = map.game_map.occupation.get(&new_dest) {
+                // 产生一次攻击
+                info!("attack");
+                commands.spawn(Attack { attacker: mover_entity, target: Some(target.clone()) });
             }
         }
         // delete movement Component

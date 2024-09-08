@@ -7,3 +7,5 @@ pub(crate) mod game_hud;
 pub(crate) mod game_camera;
 pub(crate) mod fov;
 pub(crate) mod monster_spawn;
+pub(crate) mod combat;
+pub(crate) mod destroy_object;

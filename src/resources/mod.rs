@@ -1,3 +1,5 @@
+pub mod game_log;
+
 use crate::components::position_2d::Position2d;
 use bevy::prelude::*;
 
@@ -14,3 +16,6 @@ pub struct MapCameraCenter(pub Option<Position2d>);
 ///
 #[derive(Resource)]
 pub struct TileSize(pub f32);
+
+
+

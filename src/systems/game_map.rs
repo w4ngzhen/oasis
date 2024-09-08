@@ -77,7 +77,7 @@ fn utils_spawn_map_tile_sprite(
         commands.spawn((
             MapTileElement { color: bg_color, is_background: true },
             Position2d { x: pos.x, y: pos.y }, // z = 0, background.
-            PositionZIndex(0), // background always.
+            PositionZIndex(0),                 // background always.
             SpriteBundle {
                 sprite: Sprite {
                     color: bg_color,
