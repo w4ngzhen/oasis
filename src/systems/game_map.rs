@@ -28,13 +28,14 @@ pub fn spawn_map_tiles(
             let render_descriptor = tile_to_render_descriptor(mb.game_map.tiles[idx]);
 
             if let Some(render_descriptor) = render_descriptor {
-                utils_spawn_map_tile_sprite(
+                utils_spawn_map_tile_sprite::<()>(
                     &mut commands,
                     &charset_asset,
                     &render_descriptor,
                     &Position2d::new(x, y),
                     1,
                     Visibility::Hidden, // default hidden
+                    None,
                 );
             }
         }
@@ -58,20 +59,24 @@ pub fn spawn_map_pick_cursor(
             &Position2d { x: player_pos.x, y: player_pos.y },
             999,
             Visibility::Visible,
+            Some(MapPickCursor),
         );
     } else {
         warn!("cannot get player position, so, we cannot spawn pick cursor");
     }
 }
 
-fn utils_spawn_map_tile_sprite(
+fn utils_spawn_map_tile_sprite<TBundle>(
     commands: &mut Commands,
     charset_asset: &Res<CharsetAsset>,
     tile_render_descriptor: &TileRenderDescriptor,
     pos: &Position2d,
     z_index: i32,
     visibility: Visibility,
-) {
+    extend_bundle: Option<TBundle>,
+) where
+    TBundle: Bundle,
+{
     // 背景色
     if let Some(bg_color) = tile_render_descriptor.bg_color {
         commands.spawn((
@@ -90,7 +95,7 @@ fn utils_spawn_map_tile_sprite(
             },
         ));
     }
-    commands.spawn((
+    let mut cmds = commands.spawn((
         MapTileElement { color: tile_render_descriptor.color, is_background: false },
         Position2d { x: pos.x, y: pos.y },
         PositionZIndex(z_index),
@@ -111,6 +116,9 @@ fn utils_spawn_map_tile_sprite(
             index: tile_render_descriptor.tile_index,
         },
     ));
+    if let Some(bundle) = extend_bundle {
+        cmds.insert(bundle);
+    }
 }
 /// 渲染地图内容，其核心是将相关TileElement放置到对应位置
 pub fn render_map_tile(
