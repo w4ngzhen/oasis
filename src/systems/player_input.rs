@@ -2,7 +2,7 @@ use crate::components::position_2d::Position2d;
 use crate::components::role::Player;
 use crate::components::{MapPickCursor, Movement};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
-use crate::game_state::PlayerTurnSubState;
+use crate::game_state::InGamingSubState;
 use crate::resources::{MapCameraCenter, TileSize};
 use bevy::prelude::*;
 
@@ -10,14 +10,14 @@ pub fn player_action_input(
     mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     query: Query<(&Position2d, Entity), With<Player>>,
-    mut next_state: ResMut<NextState<PlayerTurnSubState>>,
+    mut next_state: ResMut<NextState<InGamingSubState>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyY) {
         // enter explore state.
-        next_state.set(PlayerTurnSubState::MapExploring);
+        next_state.set(InGamingSubState::MapExploring);
         return;
     } else if keyboard_input.just_pressed(KeyCode::KeyP) {
-        next_state.set(PlayerTurnSubState::MapPicking);
+        next_state.set(InGamingSubState::MapPicking);
         return;
     }
 
@@ -38,6 +38,8 @@ pub fn player_action_input(
             // 在本系统中，我们仅仅处理玩家输入，不进行移动的操作，
             // 而是产生一个移动组件，在另一个专门处理移动系统中来进行移动
             commands.spawn(Movement { entity: player_entity, destination: new_pos });
+            info!("player finished action, to monster action");
+            next_state.set(InGamingSubState::MonsterAction);
         }
     }
 }
@@ -54,7 +56,7 @@ pub fn player_explore_input(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut map_camera_center: ResMut<MapCameraCenter>,
     map_builder: Res<GameMapBuilder>,
-    mut next_state: ResMut<NextState<PlayerTurnSubState>>,
+    mut next_state: ResMut<NextState<InGamingSubState>>,
 ) {
     // check free camera
     let pressed_key = keyboard_input.get_just_pressed().next().cloned();
@@ -65,7 +67,7 @@ pub fn player_explore_input(
                 KeyCode::KeyY | KeyCode::Escape => {
                     map_camera_center.0 = None;
                     // back to player turn.
-                    next_state.set(PlayerTurnSubState::PlayerAction);
+                    next_state.set(InGamingSubState::PlayerAction);
                     return;
                 }
                 KeyCode::ArrowLeft => next_pos.x -= 1,
@@ -86,7 +88,7 @@ pub fn player_picking_input(
     mut query_pick_cursor: Query<&mut Position2d, With<MapPickCursor>>,
     mut _map_camera: ResMut<MapCameraCenter>,
     map_builder: Res<GameMapBuilder>,
-    mut next_state: ResMut<NextState<PlayerTurnSubState>>,
+    mut next_state: ResMut<NextState<InGamingSubState>>,
 ) {
     if let Ok(mut pick_cursor_pos) = query_pick_cursor.get_single_mut() {
         let pressed_key = keyboard_input.get_just_pressed().next().cloned();
@@ -95,7 +97,7 @@ pub fn player_picking_input(
             match key {
                 KeyCode::KeyP | KeyCode::Escape => {
                     // back to player turn.
-                    next_state.set(PlayerTurnSubState::PlayerAction);
+                    next_state.set(InGamingSubState::PlayerAction);
                     return;
                 }
                 KeyCode::ArrowLeft => next_pick_cursor_pos.x -= 1,

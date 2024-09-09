@@ -1,5 +1,5 @@
 use crate::components::MapPickCursor;
-use crate::game_state::{GameState, PlayerTurnSubState};
+use crate::game_state::{GameState, InGamingSubState};
 use crate::resources::game_log::GameLog;
 use crate::resources::{MapCameraCenter, TileSize};
 use crate::systems::combat::handle_combat;
@@ -46,39 +46,47 @@ impl Plugin for GameAppPlugin {
         );
         app.add_systems(
             Update,
-            (monster_chasing, handle_combat, handle_object_destroy)
+            (
+                handle_combat,
+                handle_object_destroy,
+                update_game_camera,
+                render_map_tile,
+                scale_map,
+                fov,
+            )
                 .run_if(in_state(GameState::InGaming)),
         );
         app.add_systems(
             Update,
             (player_action_input, movement)
                 .chain()
-                .run_if(in_state(PlayerTurnSubState::PlayerAction)),
+                .run_if(in_state(InGamingSubState::PlayerAction)),
         );
-        app.add_systems(OnEnter(PlayerTurnSubState::MapExploring), setup_map_exploring)
-            .add_systems(
-                Update,
-                player_explore_input.run_if(in_state(PlayerTurnSubState::MapExploring)),
-            );
+        app.add_systems(OnEnter(InGamingSubState::MapExploring), setup_map_exploring).add_systems(
+            Update,
+            player_explore_input.run_if(in_state(InGamingSubState::MapExploring)),
+        );
         app.add_systems(
             OnTransition {
-                exited: PlayerTurnSubState::PlayerAction,
-                entered: PlayerTurnSubState::MapPicking,
+                exited: InGamingSubState::PlayerAction,
+                entered: InGamingSubState::MapPicking,
             },
             spawn_map_pick_cursor,
         )
         .add_systems(
             OnTransition {
-                exited: PlayerTurnSubState::MapPicking,
-                entered: PlayerTurnSubState::PlayerAction,
+                exited: InGamingSubState::MapPicking,
+                entered: InGamingSubState::PlayerAction,
             },
             destroy_entity::<MapPickCursor>,
         )
-        .add_systems(Update, player_picking_input.run_if(in_state(PlayerTurnSubState::MapPicking)));
+        .add_systems(Update, player_picking_input.run_if(in_state(InGamingSubState::MapPicking)));
         app.add_systems(
-            Update,
-            (update_game_camera, render_map_tile, scale_map, fov)
-                .run_if(in_state(GameState::InGaming)),
+            OnTransition {
+                exited: InGamingSubState::PlayerAction,
+                entered: InGamingSubState::MonsterAction,
+            },
+            (monster_chasing, movement).chain(),
         );
     }
 }

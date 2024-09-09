@@ -26,7 +26,7 @@ pub struct CenterTilePosition(pub Position2d);
 
 /// 移动组件
 /// 该组件会在 移动系统 中消费
-#[derive(Component, Clone, Copy)]
+#[derive(Component, Clone, Copy, Debug)]
 pub struct Movement {
     pub entity: Entity,
     pub destination: Position2d,

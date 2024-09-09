@@ -19,12 +19,12 @@ pub enum GameState {
     Paused,
 }
 
-
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, SubStates)]
 #[source(GameState = GameState::InGaming)]
-pub enum PlayerTurnSubState {
+pub enum InGamingSubState {
     #[default]
     PlayerAction,
     MapExploring,
     MapPicking,
+    MonsterAction,
 }

@@ -4,6 +4,7 @@ use crate::components::role::{Monster, Player};
 use crate::components::Movement;
 use crate::core_module::game_map::game_map::GameMap;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
+use crate::game_state::InGamingSubState;
 use bevy::prelude::*;
 use pathfinding::prelude::astar;
 
@@ -12,13 +13,18 @@ pub fn monster_chasing(
     q_monster: Query<(Entity, &Position2d, &FieldOfVision), With<Monster>>,
     q_player: Query<&Position2d, With<Player>>,
     mb: Res<GameMapBuilder>,
+    mut next_state: ResMut<NextState<InGamingSubState>>,
 ) {
     let player_pos = q_player.single();
     for (monster_entity, monster_pos, fov) in q_monster.iter() {
         if fov.visible_tiles.contains(player_pos) {
+            info!("monster saw you!");
             // calc path
             let path = calc_path(monster_pos, player_pos, &mb.game_map);
-            if let Some(first_pos) = path.first() {
+            info!("path: {:?}", path);
+            // path的第一个就是自己的位置，所以要跳过
+            if let Some(first_pos) = path.iter().skip(1).next() {
+                info!("monster will move to you. {:?}", first_pos);
                 commands.spawn(Movement {
                     entity: monster_entity.clone(),
                     destination: first_pos.clone(),
@@ -26,11 +32,12 @@ pub fn monster_chasing(
             }
         }
     }
+    info!("monster finished action, to player action");
+    next_state.set(InGamingSubState::PlayerAction);
 }
 
 /// calc path by a-star
 fn calc_path(src: &Position2d, dest: &Position2d, map: &GameMap) -> Vec<Position2d> {
-    const SCALE: u64 = 10;
     #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
     struct Pos(i32, i32);
     impl Pos {
@@ -46,7 +53,7 @@ fn calc_path(src: &Position2d, dest: &Position2d, map: &GameMap) -> Vec<Position
             .into_iter()
             .filter(|p| {
                 // 过滤掉不能到达的点
-                map.is_occupied(&Position2d::new(p.0, p.1))
+                !map.is_occupied(&Position2d::new(p.0, p.1))
             })
             .map(|p| (p, 1))
             .collect();
