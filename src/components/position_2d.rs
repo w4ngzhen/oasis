@@ -1,4 +1,4 @@
-use bevy::prelude::Component;
+use bevy::prelude::*;
 use std::fmt::{Display, Formatter};
 use std::hash::Hash;
 use std::ops;

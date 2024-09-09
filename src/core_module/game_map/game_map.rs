@@ -1,7 +1,7 @@
 use crate::components::position_2d::Position2d;
 use crate::core_module::*;
 use bevy::prelude::*;
-use bevy::utils::HashMap;
+use std::collections::HashMap;
 
 const NUM_TILES: i32 = GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT;
 
@@ -44,6 +44,10 @@ impl GameMap {
 
     pub fn is_tile_opacity(&self, position: &Position2d) -> bool {
         self.in_bounds(position) && self.tiles[map_idx(position.x, position.y)] == TileType::Wall
+    }
+
+    pub fn is_occupied(&self, position: &Position2d) -> bool {
+        self.in_bounds(position) && self.occupation.contains_key(&position)
     }
 
     pub fn remove_entity(&mut self, target_entity: Entity) {

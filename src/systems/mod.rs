@@ -9,3 +9,4 @@ pub(crate) mod fov;
 pub(crate) mod monster_spawn;
 pub(crate) mod combat;
 pub(crate) mod destroy_object;
+pub(crate) mod monster_ai;

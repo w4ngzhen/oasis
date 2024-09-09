@@ -10,6 +10,7 @@ use crate::systems::game_hud::spawn_game_hud;
 use crate::systems::game_map::{
     render_map_tile, setup_game_map, spawn_map_pick_cursor, spawn_map_tiles,
 };
+use crate::systems::monster_ai::monster_chasing;
 use crate::systems::monster_spawn::spawn_monster;
 use crate::systems::movement::movement;
 use crate::systems::player_input::{
@@ -45,7 +46,8 @@ impl Plugin for GameAppPlugin {
         );
         app.add_systems(
             Update,
-            (handle_combat, handle_object_destroy).run_if(in_state(GameState::InGaming)),
+            (monster_chasing, handle_combat, handle_object_destroy)
+                .run_if(in_state(GameState::InGaming)),
         );
         app.add_systems(
             Update,

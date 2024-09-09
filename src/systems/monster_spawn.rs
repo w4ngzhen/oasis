@@ -1,3 +1,4 @@
+use crate::components::attributes::Attributes;
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::role::Monster;
@@ -6,7 +7,6 @@ use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::resources::CharsetAsset;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
-use crate::components::attributes::Attributes;
 
 pub fn spawn_monster(
     mut commands: Commands,
