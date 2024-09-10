@@ -6,7 +6,7 @@ use crate::game_state::InGamingSubState;
 use crate::resources::{MapCameraCenter, TileSize};
 use bevy::prelude::*;
 
-pub fn player_action_input(
+pub fn player_input(
     mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     query: Query<(&Position2d, Entity), With<Player>>,
@@ -19,6 +19,7 @@ pub fn player_action_input(
     } else if keyboard_input.just_pressed(KeyCode::KeyP) {
         next_state.set(InGamingSubState::MapPicking);
         return;
+    } else if keyboard_input.just_pressed(KeyCode::Period) {
     }
 
     let pressed_key = keyboard_input.get_just_pressed().next().cloned();
@@ -38,8 +39,7 @@ pub fn player_action_input(
             // 在本系统中，我们仅仅处理玩家输入，不进行移动的操作，
             // 而是产生一个移动组件，在另一个专门处理移动系统中来进行移动
             commands.spawn(Movement { entity: player_entity, destination: new_pos });
-            info!("player finished action, to monster action");
-            next_state.set(InGamingSubState::MonsterAction);
+            next_state.set(InGamingSubState::PlayerAction);
         }
     }
 }

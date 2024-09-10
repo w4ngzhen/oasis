@@ -23,9 +23,9 @@ pub enum GameState {
 #[source(GameState = GameState::InGaming)]
 pub enum InGamingSubState {
     #[default]
+    AwaitingPlayerInput,
     PlayerAction,
     MapExploring,
     MapPicking,
     MonsterAction,
-    EndTurn,
 }

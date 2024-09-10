@@ -13,7 +13,6 @@ pub fn monster_chasing(
     q_monster: Query<(Entity, &Position2d, &FieldOfVision), With<Monster>>,
     q_player: Query<&Position2d, With<Player>>,
     mb: Res<GameMapBuilder>,
-    mut next_state: ResMut<NextState<InGamingSubState>>,
 ) {
     let player_pos = q_player.single();
     for (monster_entity, monster_pos, fov) in q_monster.iter() {
@@ -32,8 +31,6 @@ pub fn monster_chasing(
             }
         }
     }
-    info!("monster finished action, to player action");
-    next_state.set(InGamingSubState::PlayerAction);
 }
 
 /// calc path by a-star

@@ -2,19 +2,19 @@ use crate::components::MapPickCursor;
 use crate::game_state::{GameState, InGamingSubState};
 use crate::resources::game_log::GameLog;
 use crate::resources::{MapCameraCenter, TileSize};
-use crate::systems::combat::handle_combat;
-use crate::systems::end_turn::handle_object_destroy;
+use crate::systems::combat::{handle_combat, handle_object_destroy};
+use crate::systems::end_turn::end_turn;
 use crate::systems::fov::fov;
 use crate::systems::game_camera::{spawn_game_camera, update_game_camera};
 use crate::systems::game_hud::spawn_game_hud;
 use crate::systems::game_map::{
     render_map_tile, setup_game_map, spawn_map_pick_cursor, spawn_map_tiles,
 };
-use crate::systems::monster_ai::monster_chasing;
+use crate::systems::monster_action::monster_chasing;
 use crate::systems::monster_spawn::spawn_monster;
 use crate::systems::movement::movement;
 use crate::systems::player_input::{
-    player_action_input, player_explore_input, player_picking_input, scale_map, setup_map_exploring,
+    player_explore_input, player_input, player_picking_input, scale_map, setup_map_exploring,
 };
 use crate::systems::player_spawn::spawn_player;
 use crate::utils::destroy_entity;
@@ -51,7 +51,11 @@ impl Plugin for GameAppPlugin {
         );
         app.add_systems(
             Update,
-            (player_action_input, movement, handle_combat, handle_object_destroy)
+            player_input.run_if(in_state(InGamingSubState::AwaitingPlayerInput)),
+        );
+        app.add_systems(
+            Update,
+            (movement, handle_combat, handle_object_destroy, end_turn)
                 .chain()
                 .run_if(in_state(InGamingSubState::PlayerAction)),
         );
@@ -61,7 +65,7 @@ impl Plugin for GameAppPlugin {
         );
         app.add_systems(
             OnTransition {
-                exited: InGamingSubState::PlayerAction,
+                exited: InGamingSubState::AwaitingPlayerInput,
                 entered: InGamingSubState::MapPicking,
             },
             spawn_map_pick_cursor,
@@ -69,7 +73,7 @@ impl Plugin for GameAppPlugin {
         .add_systems(
             OnTransition {
                 exited: InGamingSubState::MapPicking,
-                entered: InGamingSubState::PlayerAction,
+                entered: InGamingSubState::AwaitingPlayerInput,
             },
             destroy_entity::<MapPickCursor>,
         )
@@ -79,7 +83,7 @@ impl Plugin for GameAppPlugin {
                 exited: InGamingSubState::PlayerAction,
                 entered: InGamingSubState::MonsterAction,
             },
-            (monster_chasing, movement, handle_combat, handle_object_destroy).chain(),
+            (monster_chasing, movement, handle_combat, handle_object_destroy, end_turn).chain(),
         );
     }
 }

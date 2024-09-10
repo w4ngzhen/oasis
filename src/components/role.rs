@@ -14,7 +14,6 @@ pub struct RoleStateBundle {
     pub defense: Defense,
 }
 
-
 #[derive(Component, Clone, Copy, Default)]
 pub struct Health {
     current: i32,
@@ -33,5 +32,5 @@ pub struct Damage {
 
 #[derive(Component, Clone, Copy, Default)]
 pub struct Defense {
-   current: i32
+    current: i32,
 }
