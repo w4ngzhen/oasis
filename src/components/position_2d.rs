@@ -1,3 +1,4 @@
+use crate::core_module::GAME_MAP_TILE_WIDTH;
 use bevy::prelude::*;
 use std::fmt::{Display, Formatter};
 use std::hash::Hash;
@@ -52,6 +53,10 @@ impl Position2d {
 
     pub fn to_tuple(&self) -> (i32, i32) {
         (self.x, self.y)
+    }
+
+    pub fn to_index(&self) -> usize {
+        (self.x + self.y * GAME_MAP_TILE_WIDTH) as usize
     }
 }
 

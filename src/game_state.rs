@@ -27,4 +27,5 @@ pub enum InGamingSubState {
     MapExploring,
     MapPicking,
     MonsterAction,
+    EndTurn,
 }

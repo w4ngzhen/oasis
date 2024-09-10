@@ -41,22 +41,25 @@ fn calc_path(src: &Position2d, dest: &Position2d, map: &GameMap) -> Vec<Position
     #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
     struct Pos(i32, i32);
     impl Pos {
-        fn successors(&self, map: &GameMap) -> Vec<(Pos, u64)> {
+        fn successors(&self, map: &GameMap, dest_pos: Self) -> Vec<(Pos, u64)> {
             let &Pos(curr_x, curr_y) = self;
-            // 从当前点开始，下一次能走四个方位
+            // 从当前点开始，下一次能走四个方位：上下左右
             let next: Vec<(Pos, u64)> = vec![
                 Pos(curr_x, curr_y - 1),
+                Pos(curr_x, curr_y + 1),
                 Pos(curr_x - 1, curr_y),
                 Pos(curr_x + 1, curr_y),
-                Pos(curr_x, curr_y + 1),
             ]
             .into_iter()
             .filter(|p| {
-                // 过滤掉不能到达的点
-                !map.is_occupied(&Position2d::new(p.0, p.1))
+                // 保留可到达的点：
+                // 1. 就是终点
+                // 2. 或没有占据的点
+                *p == dest_pos || !map.is_occupied(&Position2d::new(p.0, p.1))
             })
             .map(|p| (p, 1))
             .collect();
+            // info!("successors: {:?}", next);
             next
         }
     }
@@ -65,7 +68,7 @@ fn calc_path(src: &Position2d, dest: &Position2d, map: &GameMap) -> Vec<Position
     let dest_pos = Pos(dest.x, dest.y);
     let result = astar(
         &src_pos,
-        |p| p.successors(map),
+        |p| p.successors(map, dest_pos.clone()),
         |p| (p.0.abs_diff(dest_pos.0) + p.1.abs_diff(dest_pos.1)) as u64,
         |p| *p == dest_pos,
     );

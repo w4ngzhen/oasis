@@ -23,15 +23,16 @@ pub fn movement(
                 && !map.game_map.is_tile_opacity(&new_dest)
                 && map.game_map.occupation.get(&new_dest).is_none()
             {
-                // 准备完成移动
-                // 先更新map中的entity的occupation数据
+                // 如果移动的实体是地图上的occupation中的，则需要调整对应的实体位置
                 if map.game_map.occupation.get(&mover_curr_pos) == Some(&mover_entity) {
-                    map.game_map.occupation.remove(&mover_curr_pos);
-                    map.game_map.occupation.insert(new_dest.clone(), mover_entity);
+                    if let Some(ent) = map.game_map.occupation.remove(&mover_curr_pos) {
+                        map.game_map.occupation.insert(new_dest.clone(), ent);
+                    }
                 }
                 mover_curr_pos.x = new_dest.x;
                 mover_curr_pos.y = new_dest.y;
                 mover_fov.is_dirty_data = true;
+                // map.game_map.print_occupations();
             } else if let Some(target) = map.game_map.occupation.get(&new_dest) {
                 // 产生一次攻击
                 info!("attack");

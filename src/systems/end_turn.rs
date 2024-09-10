@@ -1,9 +1,7 @@
-use crate::components::position_2d::Position2d;
 use crate::components::DestroyObject;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use bevy::log::info;
 use bevy::prelude::*;
-use bevy::utils::warn;
 
 pub fn handle_object_destroy(
     mut commands: Commands,

@@ -3,7 +3,7 @@ use crate::game_state::{GameState, InGamingSubState};
 use crate::resources::game_log::GameLog;
 use crate::resources::{MapCameraCenter, TileSize};
 use crate::systems::combat::handle_combat;
-use crate::systems::destroy_object::handle_object_destroy;
+use crate::systems::end_turn::handle_object_destroy;
 use crate::systems::fov::fov;
 use crate::systems::game_camera::{spawn_game_camera, update_game_camera};
 use crate::systems::game_hud::spawn_game_hud;
@@ -46,19 +46,12 @@ impl Plugin for GameAppPlugin {
         );
         app.add_systems(
             Update,
-            (
-                handle_combat,
-                handle_object_destroy,
-                update_game_camera,
-                render_map_tile,
-                scale_map,
-                fov,
-            )
+            (update_game_camera, render_map_tile, scale_map, fov)
                 .run_if(in_state(GameState::InGaming)),
         );
         app.add_systems(
             Update,
-            (player_action_input, movement)
+            (player_action_input, movement, handle_combat, handle_object_destroy)
                 .chain()
                 .run_if(in_state(InGamingSubState::PlayerAction)),
         );
@@ -86,7 +79,7 @@ impl Plugin for GameAppPlugin {
                 exited: InGamingSubState::PlayerAction,
                 entered: InGamingSubState::MonsterAction,
             },
-            (monster_chasing, movement).chain(),
+            (monster_chasing, movement, handle_combat, handle_object_destroy).chain(),
         );
     }
 }

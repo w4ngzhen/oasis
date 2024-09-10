@@ -19,6 +19,7 @@ pub struct GameMap {
     /// 见过的tile
     pub visited_tiles: Vec<bool>,
     /// 地图上某些地方占据的东西是实体Entity
+    /// 包括：玩家、怪物、物品等等
     pub occupation: HashMap<Position2d, Entity>,
 }
 
@@ -68,5 +69,13 @@ impl GameMap {
         } else {
             Some(map_idx(position.x, position.y))
         }
+    }
+
+    pub fn print_occupations(&self) {
+        let mut list = self.occupation.keys().collect::<Vec<&Position2d>>();
+        list.sort_by(|p1, p2| {
+            return p1.to_index().cmp(&p2.to_index());
+        });
+        info!("{:?}", list);
     }
 }
