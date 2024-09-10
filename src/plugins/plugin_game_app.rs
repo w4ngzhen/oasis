@@ -20,7 +20,7 @@ use crate::systems::player_spawn::spawn_player;
 use crate::utils::destroy_entity;
 use bevy::app::App;
 use bevy::prelude::{
-    in_state, IntoSystemConfigs, NextState, OnEnter, OnTransition, Plugin, ResMut, Update,
+    in_state, IntoSystemConfigs, NextState, OnEnter, OnExit, OnTransition, Plugin, ResMut, Update,
 };
 
 pub struct GameAppPlugin;
@@ -63,21 +63,12 @@ impl Plugin for GameAppPlugin {
             Update,
             player_explore_input.run_if(in_state(InGamingSubState::MapExploring)),
         );
-        app.add_systems(
-            OnTransition {
-                exited: InGamingSubState::AwaitingPlayerInput,
-                entered: InGamingSubState::MapPicking,
-            },
-            spawn_map_pick_cursor,
-        )
-        .add_systems(
-            OnTransition {
-                exited: InGamingSubState::MapPicking,
-                entered: InGamingSubState::AwaitingPlayerInput,
-            },
-            destroy_entity::<MapPickCursor>,
-        )
-        .add_systems(Update, player_picking_input.run_if(in_state(InGamingSubState::MapPicking)));
+        app.add_systems(OnEnter(InGamingSubState::MapPicking), spawn_map_pick_cursor)
+            .add_systems(
+                Update,
+                player_picking_input.run_if(in_state(InGamingSubState::MapPicking)),
+            )
+            .add_systems(OnExit(InGamingSubState::MapPicking), destroy_entity::<MapPickCursor>);
         app.add_systems(
             OnTransition {
                 exited: InGamingSubState::PlayerAction,

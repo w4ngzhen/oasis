@@ -67,7 +67,7 @@ pub fn player_explore_input(
                 KeyCode::KeyY | KeyCode::Escape => {
                     map_camera_center.0 = None;
                     // back to player turn.
-                    next_state.set(InGamingSubState::PlayerAction);
+                    next_state.set(InGamingSubState::AwaitingPlayerInput);
                     return;
                 }
                 KeyCode::ArrowLeft => next_pos.x -= 1,
@@ -96,8 +96,7 @@ pub fn player_picking_input(
             let mut next_pick_cursor_pos = pick_cursor_pos.clone();
             match key {
                 KeyCode::KeyP | KeyCode::Escape => {
-                    // back to player turn.
-                    next_state.set(InGamingSubState::PlayerAction);
+                    next_state.set(InGamingSubState::AwaitingPlayerInput);
                     return;
                 }
                 KeyCode::ArrowLeft => next_pick_cursor_pos.x -= 1,
