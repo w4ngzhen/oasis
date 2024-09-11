@@ -2,21 +2,21 @@ use crate::components::attack::Attack;
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position_2d::Position2d;
 use crate::components::role::{Monster, Player};
-use crate::components::Movement;
+use crate::components::WantsToMove;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use bevy::prelude::*;
 
 pub fn movement(
     mut commands: Commands,
-    query_movement: Query<(Entity, &Movement)>,
+    query_movement: Query<(Entity, &WantsToMove)>,
     mut query_mover: Query<(Entity, &mut FieldOfVision, &mut Position2d)>,
     mut map: ResMut<GameMapBuilder>,
 ) {
-    for (movement_entity, movement) in query_movement.iter() {
-        info!("movement {:?}", movement);
-        let new_dest = movement.destination;
+    for (movement_entity, wants_to_move) in query_movement.iter() {
+        info!("movement {:?}", wants_to_move);
+        let new_dest = wants_to_move.destination;
         if let Ok((mover_entity, mut mover_fov, mut mover_curr_pos)) =
-            query_mover.get_mut(movement.entity)
+            query_mover.get_mut(wants_to_move.entity)
         {
             // check the movement is valid
             if map.game_map.in_bounds(&new_dest)

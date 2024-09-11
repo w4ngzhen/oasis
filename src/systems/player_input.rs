@@ -1,6 +1,6 @@
 use crate::components::position_2d::Position2d;
 use crate::components::role::Player;
-use crate::components::{MapPickCursor, Movement};
+use crate::components::{MapPickCursor, WantsToMove};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::game_state::InGamingSubState;
 use crate::resources::{MapCameraCenter, TileSize};
@@ -38,7 +38,7 @@ pub fn player_input(
         if new_pos != *curr_player_pos {
             // 在本系统中，我们仅仅处理玩家输入，不进行移动的操作，
             // 而是产生一个移动组件，在另一个专门处理移动系统中来进行移动
-            commands.spawn(Movement { entity: player_entity, destination: new_pos });
+            commands.spawn(WantsToMove { entity: player_entity, destination: new_pos });
             next_state.set(InGamingSubState::PlayerAction);
         }
     }

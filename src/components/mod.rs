@@ -8,6 +8,7 @@ pub mod attack;
 pub mod field_of_vision;
 pub mod name;
 pub mod position_2d;
+pub mod item;
 
 /// Map tile tag
 #[derive(Component)]
@@ -27,7 +28,7 @@ pub struct CenterTilePosition(pub Position2d);
 /// 移动组件
 /// 该组件会在 移动系统 中消费
 #[derive(Component, Clone, Copy, Debug)]
-pub struct Movement {
+pub struct WantsToMove {
     pub entity: Entity,
     pub destination: Position2d,
 }
@@ -45,6 +46,23 @@ pub struct GameHudCamera;
 pub struct MapPickCursor;
 
 #[derive(Component, Clone, Copy)]
-pub struct DestroyObject(pub Entity);
+pub struct WantsToDestroy(pub Entity);
 #[derive(Component, Clone)]
 pub struct Name(pub String);
+
+#[derive(Component, Clone)]
+pub struct Description(pub String);
+
+
+#[derive(Component, Clone)]
+pub struct Weapon;
+
+
+#[derive(Component, Clone)]
+pub struct Equipment {
+    head: Option<Entity>,
+    body: Option<Entity>,
+    left_hand: Option<Entity>,
+    right_hand: Option<Entity>,
+    foot: Option<Entity>,
+}

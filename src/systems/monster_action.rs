@@ -1,7 +1,7 @@
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position_2d::Position2d;
 use crate::components::role::{Monster, Player};
-use crate::components::Movement;
+use crate::components::WantsToMove;
 use crate::core_module::game_map::game_map::GameMap;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::game_state::InGamingSubState;
@@ -24,7 +24,7 @@ pub fn monster_chasing(
             // path的第一个就是自己的位置，所以要跳过
             if let Some(first_pos) = path.iter().skip(1).next() {
                 info!("monster will move to you. {:?}", first_pos);
-                commands.spawn(Movement {
+                commands.spawn(WantsToMove {
                     entity: monster_entity.clone(),
                     destination: first_pos.clone(),
                 });

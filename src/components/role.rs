@@ -34,3 +34,12 @@ pub struct Damage {
 pub struct Defense {
     current: i32,
 }
+
+pub enum RolePart {
+    Head,
+    Body,
+    LeftHand,
+    RightHand,
+    Leg,
+    Foot,
+}

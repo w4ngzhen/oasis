@@ -1,10 +1,11 @@
 use crate::components::attack::Attack;
 use crate::components::attributes::Attributes;
-use crate::components::DestroyObject;
+use crate::components::item::{Carrier, Equipped, Item};
+use crate::components::{WantsToDestroy};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::resources::game_log::GameLog;
 use bevy::log::info;
-use bevy::prelude::{Commands, DespawnRecursiveExt, Entity, Query, ResMut};
+use bevy::prelude::*;
 
 pub fn handle_combat(
     mut commands: Commands,
@@ -39,14 +40,14 @@ pub fn handle_combat(
                 let (_, mut t_attr) = q_role.get_mut(target_entity).unwrap();
                 *t_attr = next_target_attr;
                 if t_attr.current_hp <= 0 {
-                    commands.spawn(DestroyObject(target_entity));
+                    commands.spawn(WantsToDestroy(target_entity));
                 }
             }
             if let Some(next_attacker_attr) = next_attacker_attr {
                 let (_, mut a_attr) = q_role.get_mut(attacker_entity).unwrap();
                 *a_attr = next_attacker_attr;
                 if a_attr.current_hp <= 0 {
-                    commands.spawn(DestroyObject(attacker_entity));
+                    commands.spawn(WantsToDestroy(attacker_entity));
                 }
             }
         }
@@ -57,13 +58,26 @@ pub fn handle_combat(
 pub fn handle_object_destroy(
     mut commands: Commands,
     mut mb: ResMut<GameMapBuilder>,
-    q_destroy: Query<(Entity, &DestroyObject)>,
+    q_destroy: Query<(Entity, &WantsToDestroy)>,
+    q_carrier: Query<(Entity, &Carrier), With<Item>>,
+    q_equipped_item: Query<(Entity, &Equipped), With<Item>>,
 ) {
     for (msg, destroy) in q_destroy.iter() {
-        let entity = destroy.0;
-        commands.entity(entity).despawn_recursive();
-        mb.game_map.remove_entity(entity);
-        info!("{:?} died.", entity);
+        let be_destroyed_entity = destroy.0;
+        let carried_entities = q_carrier
+            .iter()
+            .filter_map(
+                |(item_entity, carrier)| {
+                    if carrier.0 == be_destroyed_entity {
+                        Some(item_entity)
+                    } else {
+                        None
+                    }
+                },
+            );
+        commands.entity(be_destroyed_entity).despawn_recursive();
+        mb.game_map.remove_entity(be_destroyed_entity);
+        info!("{:?} died.", be_destroyed_entity);
         commands.entity(msg).despawn_recursive();
     }
 }
