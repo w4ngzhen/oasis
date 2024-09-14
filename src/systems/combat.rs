@@ -1,7 +1,8 @@
 use crate::components::attack::Attack;
 use crate::components::attributes::Attributes;
 use crate::components::item::{Carrier, Equipped, Item};
-use crate::components::{WantsToDestroy};
+use crate::components::name::Naming;
+use crate::components::WantsToDestroy;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::resources::game_log::GameLog;
 use bevy::log::info;
@@ -60,21 +61,26 @@ pub fn handle_object_destroy(
     mut mb: ResMut<GameMapBuilder>,
     q_destroy: Query<(Entity, &WantsToDestroy)>,
     q_carrier: Query<(Entity, &Carrier), With<Item>>,
-    q_equipped_item: Query<(Entity, &Equipped), With<Item>>,
+    q_name: Query<&Naming, With<Item>>,
+    // q_equipped_item: Query<(Entity, &Equipped), With<Item>>,
 ) {
     for (msg, destroy) in q_destroy.iter() {
         let be_destroyed_entity = destroy.0;
-        let carried_entities = q_carrier
-            .iter()
-            .filter_map(
-                |(item_entity, carrier)| {
-                    if carrier.0 == be_destroyed_entity {
-                        Some(item_entity)
-                    } else {
-                        None
-                    }
-                },
-            );
+        // if it has items, place theme at floor
+        let carried_entities = q_carrier.iter().filter_map(|(item_entity, carrier)| {
+            if carrier.0 == be_destroyed_entity {
+                Some(item_entity)
+            } else {
+                None
+            }
+        });
+        carried_entities.for_each(|carried_entity| {
+            if let Ok(name) = q_name.get(carried_entity) {
+                info!("Carried item: {:?}", name);
+            } else {
+                info!("Carried item: {:?}", carried_entity);
+            }
+        });
         commands.entity(be_destroyed_entity).despawn_recursive();
         mb.game_map.remove_entity(be_destroyed_entity);
         info!("{:?} died.", be_destroyed_entity);
