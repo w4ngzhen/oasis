@@ -6,10 +6,10 @@ use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::{MapTileElement, WantsToDestroy};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::resources::game_log::GameLog;
+use crate::resources::CharsetAsset;
 use bevy::log::info;
 use bevy::prelude::*;
 use bevy::reflect::List;
-use crate::resources::CharsetAsset;
 
 pub fn handle_combat(
     mut commands: Commands,
@@ -98,8 +98,7 @@ pub fn handle_object_destroy(
                     ..Default::default()
                 },
                 TextureAtlas { layout: atlas.atlas.clone(), index: '@' as usize },
-            )
-            );
+            ));
         }
         commands.entity(be_destroyed_entity).despawn_recursive();
         mb.game_map.remove_entity(be_destroyed_entity);
