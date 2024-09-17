@@ -9,6 +9,7 @@ pub mod field_of_vision;
 pub mod name;
 pub mod position_2d;
 pub mod item;
+pub mod bundles;
 
 /// Map tile tag
 #[derive(Component)]
