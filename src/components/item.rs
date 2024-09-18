@@ -3,7 +3,7 @@ use bevy::prelude::{Component, Entity};
 
 #[derive(Component, Default)]
 pub struct ItemCollection {
-    items: Vec<Entity>,
+    pub items: Vec<Entity>,
 }
 
 #[derive(Component, Default)]
@@ -13,6 +13,7 @@ pub enum Item {
     Weapon(RolePart),
     Medicine,
     Scroll,
+    Container,
 }
 
 /// 被谁携带

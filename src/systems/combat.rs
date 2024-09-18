@@ -1,14 +1,18 @@
 use crate::components::attack::WantsToAttack;
 use crate::components::attributes::Attributes;
-use crate::components::item::{Carrier, Equipped, Item};
+use crate::components::bundles::element_render_bundle;
+use crate::components::item::{Carrier, Equipped, Item, ItemCollection};
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::{MapTileElement, Naming, WantsToDestroy};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
+use crate::core_module::GAME_MAP_TILE_WIDTH;
 use crate::resources::game_log::GameLog;
 use crate::resources::CharsetAsset;
+use crate::utils::get_charset_index;
 use bevy::log::info;
 use bevy::prelude::*;
 use bevy::reflect::List;
+use bevy::render::render_resource::encase::private::RuntimeSizedArray;
 
 pub fn handle_combat(
     mut commands: Commands,
@@ -61,55 +65,93 @@ pub fn handle_combat(
 pub fn handle_object_destroy(
     mut commands: Commands,
     mut mb: ResMut<GameMapBuilder>,
+    charset_asset: Res<CharsetAsset>,
     q_position: Query<&Position2d>,
     q_destroy: Query<(Entity, &WantsToDestroy)>,
     q_carrier: Query<(Entity, &Carrier), With<Item>>,
+    q_equipped: Query<(Entity, &Equipped), With<Item>>,
     q_name: Query<&Naming, With<Item>>,
-    atlas: Res<CharsetAsset>,
-    // q_equipped_item: Query<(Entity, &Equipped), With<Item>>,
 ) {
     for (msg, destroy) in q_destroy.iter() {
         let be_destroyed_entity = destroy.0;
         let be_destroyed_entity_pos =
             q_position.get(be_destroyed_entity).unwrap();
-        // if it has items, place theme at floor
-        let carried_entities = q_carrier
-            .iter()
-            .filter_map(|(item_entity, carrier)| {
-                if carrier.0 == be_destroyed_entity {
-                    Some(item_entity)
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<Entity>>();
-        let item_len = carried_entities.len();
-        if item_len == 1 {
-            let item = carried_entities[0];
-            commands.entity(item).remove::<Carrier>().insert((
-                MapTileElement {
-                    color: Default::default(),
-                    is_background: false,
-                },
-                be_destroyed_entity_pos.clone(),
-                PositionZIndex(2),
-                SpriteBundle {
-                    sprite: Sprite {
-                        custom_size: Some(Vec2::new(1.0, 1.0)),
-                        ..Default::default()
+        let carried_items = get_carried_items(be_destroyed_entity, &q_carrier);
+        let equipped_items =
+            get_equipped_items(be_destroyed_entity, &q_equipped);
+        let total_item_len = carried_items.len() + equipped_items.len();
+        let mut items: Vec<Entity> = Vec::with_capacity(total_item_len);
+        for item in carried_items {
+            items.push(item);
+        }
+        for item in equipped_items {
+            items.push(item);
+        }
+        match total_item_len {
+            0 => {
+                // nothing.
+            }
+            1 => {
+                // only one.
+            }
+            _ => {
+                // over one.
+                commands.spawn((
+                    Item::Container,
+                    ItemCollection { items }, // render it.
+                    MapTileElement {
+                        color: Color::srgb_u8(244, 187, 120),
+                        is_background: false,
                     },
-                    texture: atlas.texture.clone(),
-                    ..Default::default()
-                },
-                TextureAtlas {
-                    layout: atlas.atlas.clone(),
-                    index: '@' as usize,
-                },
-            ));
+                    be_destroyed_entity_pos.clone(),
+                    PositionZIndex(2),
+                    Naming("some items.".into()),
+                    element_render_bundle(
+                        get_charset_index(1, 14),
+                        &charset_asset,
+                    ),
+                ));
+            }
         }
         commands.entity(be_destroyed_entity).despawn_recursive();
         mb.game_map.remove_entity(be_destroyed_entity);
         info!("{:?} died.", be_destroyed_entity);
         commands.entity(msg).despawn_recursive();
     }
+}
+
+fn get_carried_items(
+    target: Entity,
+    q_carrier: &Query<(Entity, &Carrier), With<Item>>,
+) -> Vec<Entity> {
+    q_carrier
+        .iter()
+        .filter_map(
+            |(entity, carrier)| {
+                if carrier.0 == target {
+                    Some(entity)
+                } else {
+                    None
+                }
+            },
+        )
+        .collect::<Vec<Entity>>()
+}
+
+fn get_equipped_items(
+    target: Entity,
+    q_equipped: &Query<(Entity, &Equipped), With<Item>>,
+) -> Vec<Entity> {
+    q_equipped
+        .iter()
+        .filter_map(
+            |(entity, equipped)| {
+                if equipped.0 == target {
+                    Some(entity)
+                } else {
+                    None
+                }
+            },
+        )
+        .collect::<Vec<Entity>>()
 }

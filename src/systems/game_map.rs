@@ -3,7 +3,9 @@ use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::role::Player;
 use crate::components::{MapPickCursor, MapTileElement};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
-use crate::core_module::game_map::themes::{tile_to_render_descriptor, TileRenderDescriptor};
+use crate::core_module::game_map::themes::{
+    tile_to_render_descriptor, TileRenderDescriptor,
+};
 use crate::core_module::*;
 use crate::game_state::GameState;
 use crate::resources::{CharsetAsset, MapCameraCenter, TileSize};
@@ -25,7 +27,8 @@ pub fn spawn_map_tiles(
     for y in 0..GAME_MAP_TILE_HEIGHT {
         for x in 0..GAME_MAP_TILE_WIDTH {
             let idx = map_idx(x, y);
-            let render_descriptor = tile_to_render_descriptor(mb.game_map.tiles[idx]);
+            let render_descriptor =
+                tile_to_render_descriptor(mb.game_map.tiles[idx]);
 
             if let Some(render_descriptor) = render_descriptor {
                 utils_spawn_map_tile_sprite::<()>(
@@ -52,7 +55,7 @@ pub fn spawn_map_pick_cursor(
             &mut commands,
             &charset_asset,
             &TileRenderDescriptor::new(
-                get_charset_index(14, 0, 16),
+                get_charset_index(14, 0),
                 Color::srgba(1., 1., 1., 0.5),
                 None,
             ),
@@ -96,7 +99,10 @@ fn utils_spawn_map_tile_sprite<TBundle>(
         ));
     }
     let mut cmds = commands.spawn((
-        MapTileElement { color: tile_render_descriptor.color, is_background: false },
+        MapTileElement {
+            color: tile_render_descriptor.color,
+            is_background: false,
+        },
         Position2d { x: pos.x, y: pos.y },
         PositionZIndex(z_index),
         SpriteBundle {
@@ -137,17 +143,37 @@ pub fn render_map_tile(
     tile_size: Res<TileSize>,
 ) {
     let (player_pos, player_fov) = query_player.single();
-    let center_pos = if let Some(center) = map_camera_center.0 { center } else { *player_pos };
+    let center_pos = if let Some(center) = map_camera_center.0 {
+        center
+    } else {
+        *player_pos
+    };
     let tile_size = tile_size.0;
-    let base = Vec3::new(-(center_pos.x as f32) * tile_size, center_pos.y as f32 * tile_size, 0.);
-    for (ele_entity, tile_ele, ele_pos, ele_z_idx, mut ele_visibility, mut transform, mut sprite) in
-        q.iter_mut()
+    let base = Vec3::new(
+        -(center_pos.x as f32) * tile_size,
+        center_pos.y as f32 * tile_size,
+        0.,
+    );
+    for (
+        ele_entity,
+        tile_ele,
+        ele_pos,
+        ele_z_idx,
+        mut ele_visibility,
+        mut transform,
+        mut sprite,
+    ) in q.iter_mut()
     {
         let (visibility, is_visited_tile): (Visibility, bool) =
             if player_fov.visible_tiles.iter().any(|pos| *pos == *ele_pos) {
                 (Visibility::Visible, false)
             } else if mb.game_map.visited_tiles[map_idx(ele_pos.x, ele_pos.y)] {
-                if mb.game_map.occupation.values().any(|occupation| *occupation == ele_entity) {
+                if mb
+                    .game_map
+                    .occupation
+                    .values()
+                    .any(|occupation| *occupation == ele_entity)
+                {
                     // you can see, but it's an object on map(not wall or floor)
                     (Visibility::Hidden, true)
                 } else {

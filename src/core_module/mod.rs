@@ -3,6 +3,7 @@ use crate::components::position_2d::Position2d;
 pub mod game_hud;
 pub mod game_map;
 pub mod player;
+pub mod item;
 
 pub mod prelude {}
 pub const GAME_MAP_TILE_WIDTH: i32 = 80;

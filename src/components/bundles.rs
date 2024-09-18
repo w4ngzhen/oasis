@@ -27,7 +27,7 @@ pub fn player_bundle(
         },
         Position2d { x: player_init_pos.x, y: player_init_pos.y },
         PositionZIndex(2),
-        render_item('@' as usize, &charset_asset),
+        element_render_bundle('@' as usize, &charset_asset),
     )
 }
 
@@ -55,11 +55,11 @@ pub fn monster_bundle(
         },
         Position2d { x: monster_init_pos.x, y: monster_init_pos.y },
         PositionZIndex(2),
-        render_item('g' as usize, &charset_asset),
+        element_render_bundle('g' as usize, &charset_asset),
     )
 }
 
-pub fn render_item(
+pub fn element_render_bundle(
     tile_index: usize,
     charset_asset: &Res<CharsetAsset>,
 ) -> impl Bundle {
