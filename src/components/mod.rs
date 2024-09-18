@@ -3,13 +3,12 @@ use bevy::prelude::*;
 
 pub mod attributes;
 pub mod role;
-
 pub mod attack;
+pub mod bundles;
 pub mod field_of_vision;
+pub mod item;
 pub mod name;
 pub mod position_2d;
-pub mod item;
-pub mod bundles;
 
 /// Map tile tag
 #[derive(Component)]
@@ -48,16 +47,13 @@ pub struct MapPickCursor;
 
 #[derive(Component, Clone, Copy)]
 pub struct WantsToDestroy(pub Entity);
-#[derive(Component, Clone)]
-pub struct Name(pub String);
-
+#[derive(Component, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct Naming(pub(crate) String);
 #[derive(Component, Clone)]
 pub struct Description(pub String);
 
-
 #[derive(Component, Clone)]
 pub struct Weapon;
-
 
 #[derive(Component, Clone)]
 pub struct Equipment {

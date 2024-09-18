@@ -1,6 +1,6 @@
+use crate::game_state::GameState;
 use crate::in_main_menu::components::InMainMenuScreen;
 use crate::in_main_menu::systems::{menu_button_system, setup_main_menu};
-use crate::game_state::GameState;
 use crate::utils::destroy_entity;
 use bevy::prelude::*;
 

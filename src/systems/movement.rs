@@ -1,4 +1,4 @@
-use crate::components::attack::Attack;
+use crate::components::attack::WantsToAttack;
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position_2d::Position2d;
 use crate::components::role::{Monster, Player};
@@ -36,7 +36,7 @@ pub fn movement(
             } else if let Some(target) = map.game_map.occupation.get(&new_dest) {
                 // 产生一次攻击
                 info!("attack");
-                commands.spawn(Attack { attacker: mover_entity, target: Some(target.clone()) });
+                commands.spawn(WantsToAttack { attacker: mover_entity, target: Some(target.clone()) });
             }
         }
         // delete movement Component

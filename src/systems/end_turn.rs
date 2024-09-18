@@ -1,5 +1,5 @@
-use crate::game_state::InGamingSubState::*;
 use crate::game_state::InGamingSubState;
+use crate::game_state::InGamingSubState::*;
 use bevy::prelude::*;
 
 pub fn end_turn(

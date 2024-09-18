@@ -1,5 +1,5 @@
-use crate::base::tile_rect::TileRect;
 use crate::core_module::game_map::game_map::{GameMap, TileType};
+use crate::core_module::game_map::tile_rect::TileRect;
 use crate::core_module::*;
 use crate::utils::rand_gen::RandGen;
 use bevy::prelude::*;

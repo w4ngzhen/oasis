@@ -4,7 +4,6 @@ use crate::in_player_config::InPlayerConfigPlugin;
 use crate::in_portal::InPortalPlugin;
 use bevy::prelude::*;
 
-mod base;
 mod components;
 mod core_module;
 mod game_state;

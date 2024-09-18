@@ -19,8 +19,7 @@ pub fn player_input(
     } else if keyboard_input.just_pressed(KeyCode::KeyP) {
         next_state.set(InGamingSubState::MapPicking);
         return;
-    } else if keyboard_input.just_pressed(KeyCode::Period) {
-    }
+    } else if keyboard_input.just_pressed(KeyCode::Period) {}
 
     let pressed_key = keyboard_input.get_just_pressed().next().cloned();
     // check game input

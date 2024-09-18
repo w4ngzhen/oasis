@@ -1,9 +1,8 @@
-use crate::components::attack::Attack;
+use crate::components::attack::WantsToAttack;
 use crate::components::attributes::Attributes;
 use crate::components::item::{Carrier, Equipped, Item};
-use crate::components::name::Naming;
 use crate::components::position_2d::{Position2d, PositionZIndex};
-use crate::components::{MapTileElement, WantsToDestroy};
+use crate::components::{MapTileElement, Naming, WantsToDestroy};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::resources::game_log::GameLog;
 use crate::resources::CharsetAsset;
@@ -13,7 +12,7 @@ use bevy::reflect::List;
 
 pub fn handle_combat(
     mut commands: Commands,
-    q_attack: Query<(Entity, &Attack)>,
+    q_attack: Query<(Entity, &WantsToAttack)>,
     mut q_role: Query<(Entity, &mut Attributes)>,
     _game_log: ResMut<GameLog>,
 ) {
@@ -71,33 +70,41 @@ pub fn handle_object_destroy(
 ) {
     for (msg, destroy) in q_destroy.iter() {
         let be_destroyed_entity = destroy.0;
-        let be_destroyed_entity_pos = q_position.get(be_destroyed_entity).unwrap();
+        let be_destroyed_entity_pos =
+            q_position.get(be_destroyed_entity).unwrap();
         // if it has items, place theme at floor
         let carried_entities = q_carrier
             .iter()
-            .filter_map(
-                |(item_entity, carrier)| {
-                    if carrier.0 == be_destroyed_entity {
-                        Some(item_entity)
-                    } else {
-                        None
-                    }
-                },
-            )
+            .filter_map(|(item_entity, carrier)| {
+                if carrier.0 == be_destroyed_entity {
+                    Some(item_entity)
+                } else {
+                    None
+                }
+            })
             .collect::<Vec<Entity>>();
         let item_len = carried_entities.len();
         if item_len == 1 {
             let item = carried_entities[0];
             commands.entity(item).remove::<Carrier>().insert((
-                MapTileElement { color: Default::default(), is_background: false },
+                MapTileElement {
+                    color: Default::default(),
+                    is_background: false,
+                },
                 be_destroyed_entity_pos.clone(),
                 PositionZIndex(2),
                 SpriteBundle {
-                    sprite: Sprite { custom_size: Some(Vec2::new(1.0, 1.0)), ..Default::default() },
+                    sprite: Sprite {
+                        custom_size: Some(Vec2::new(1.0, 1.0)),
+                        ..Default::default()
+                    },
                     texture: atlas.texture.clone(),
                     ..Default::default()
                 },
-                TextureAtlas { layout: atlas.atlas.clone(), index: '@' as usize },
+                TextureAtlas {
+                    layout: atlas.atlas.clone(),
+                    index: '@' as usize,
+                },
             ));
         }
         commands.entity(be_destroyed_entity).despawn_recursive();

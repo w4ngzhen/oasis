@@ -47,15 +47,15 @@ fn calc_path(src: &Position2d, dest: &Position2d, map: &GameMap) -> Vec<Position
                 Pos(curr_x - 1, curr_y),
                 Pos(curr_x + 1, curr_y),
             ]
-            .into_iter()
-            .filter(|p| {
-                // 保留可到达的点：
-                // 1. 就是终点
-                // 2. 或没有占据的点
-                *p == dest_pos || !map.is_occupied(&Position2d::new(p.0, p.1))
-            })
-            .map(|p| (p, 1))
-            .collect();
+                .into_iter()
+                .filter(|p| {
+                    // 保留可到达的点：
+                    // 1. 就是终点
+                    // 2. 或没有占据的点
+                    *p == dest_pos || !map.is_occupied(&Position2d::new(p.0, p.1))
+                })
+                .map(|p| (p, 1))
+                .collect();
             // info!("successors: {:?}", next);
             next
         }

@@ -1,6 +1,6 @@
+use crate::game_state::GameState;
 use crate::in_portal::components::OnPortalScreen;
 use crate::in_portal::resources::GamePortalTimer;
-use crate::game_state::GameState;
 use bevy::asset::AssetServer;
 use bevy::prelude::*;
 use std::ops::DerefMut;

@@ -1,5 +1,5 @@
 use crate::components::attributes::Attributes;
-use crate::components::bundles::player_entity;
+use crate::components::bundles::player_bundle;
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::role::{Monster, Player};
@@ -10,13 +10,14 @@ use bevy::prelude::*;
 
 pub fn spawn_player(
     mut commands: Commands,
-    atlas: Res<CharsetAsset>,
+    charset_asset: Res<CharsetAsset>,
     mut mb: ResMut<GameMapBuilder>,
 ) {
     if let Some(first_room) = mb.rooms.first() {
         let player_init_pos = first_room.center();
         // spawn
-        let player_entity = commands.spawn(player_entity(player_init_pos, atlas)).id();
+        let player_entity =
+            commands.spawn(player_bundle(player_init_pos, &charset_asset)).id();
         // record player
         mb.game_map.occupation.insert(player_init_pos, player_entity);
     } else {
