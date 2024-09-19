@@ -1,7 +1,7 @@
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::role::Player;
-use crate::components::{MapPickCursor, MapTileElement};
+use crate::components::{MapPickCursor, MapTileElement, MapWantsToPick};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::core_module::game_map::themes::{
     tile_to_render_descriptor, TileRenderDescriptor,
@@ -64,6 +64,8 @@ pub fn spawn_map_pick_cursor(
             Visibility::Visible,
             Some(MapPickCursor),
         );
+        // at the same time, spawn an init WantsToPick msg.
+        commands.spawn(MapWantsToPick { position: player_pos.clone() });
     } else {
         warn!("cannot get player position, so, we cannot spawn pick cursor");
     }

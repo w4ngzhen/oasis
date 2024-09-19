@@ -16,6 +16,11 @@ pub enum Item {
     Container,
 }
 
+#[derive(Component, Copy, Clone)]
+pub struct ItemId(pub i32);
+
+pub const CONTAINER_ITEM_ID: ItemId = ItemId(0x99);
+
 /// 被谁携带
 #[derive(Component)]
 pub struct Carrier(pub Entity);

@@ -1,6 +1,7 @@
+use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position_2d::Position2d;
 use crate::components::role::Player;
-use crate::components::{MapPickCursor, WantsToMove};
+use crate::components::{MapPickCursor, MapWantsToPick, Naming, WantsToMove};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::game_state::InGamingSubState;
 use crate::resources::{MapCameraCenter, TileSize};
@@ -19,7 +20,8 @@ pub fn player_input(
     } else if keyboard_input.just_pressed(KeyCode::KeyP) {
         next_state.set(InGamingSubState::MapPicking);
         return;
-    } else if keyboard_input.just_pressed(KeyCode::Period) {}
+    } else if keyboard_input.just_pressed(KeyCode::Period) {
+    }
 
     let pressed_key = keyboard_input.get_just_pressed().next().cloned();
     // check game input
@@ -37,7 +39,10 @@ pub fn player_input(
         if new_pos != *curr_player_pos {
             // 在本系统中，我们仅仅处理玩家输入，不进行移动的操作，
             // 而是产生一个移动组件，在另一个专门处理移动系统中来进行移动
-            commands.spawn(WantsToMove { entity: player_entity, destination: new_pos });
+            commands.spawn(WantsToMove {
+                entity: player_entity,
+                destination: new_pos,
+            });
             next_state.set(InGamingSubState::PlayerAction);
         }
     }
@@ -83,7 +88,9 @@ pub fn player_explore_input(
 }
 
 pub fn player_picking_input(
+    mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
+    q_fov: Query<&FieldOfVision, With<Player>>,
     mut query_pick_cursor: Query<&mut Position2d, With<MapPickCursor>>,
     mut _map_camera: ResMut<MapCameraCenter>,
     map_builder: Res<GameMapBuilder>,
@@ -104,16 +111,47 @@ pub fn player_picking_input(
                 KeyCode::ArrowDown => next_pick_cursor_pos.y += 1,
                 _ => {}
             }
+            let fov = q_fov.single();
             if next_pick_cursor_pos != *pick_cursor_pos
                 && map_builder.game_map.in_bounds(&next_pick_cursor_pos)
+                && fov.visible_tiles.contains(&next_pick_cursor_pos)
             {
                 *pick_cursor_pos = next_pick_cursor_pos;
+                // generate a pick msg
+                commands
+                    .spawn((MapWantsToPick { position: next_pick_cursor_pos }));
             }
         }
     }
 }
 
-pub fn scale_map(keyboard_input: Res<ButtonInput<KeyCode>>, mut tile_size: ResMut<TileSize>) {
+pub fn pick_checking(
+    mut commands: Commands,
+    q_pick: Query<(Entity, &MapWantsToPick)>,
+    q_name: Query<(&Naming)>,
+    mb: Res<GameMapBuilder>,
+) {
+    for (pick_msg, wants_to_pick) in q_pick.iter() {
+        info!("check {:?}", wants_to_pick.position);
+        if let Some(item) = mb.game_map.occupation.get(&wants_to_pick.position)
+        {
+            if let Ok(name) = q_name.get(item.clone()) {
+                info!("there is: {}", name.0);
+            } else {
+                info!("there is something but no name.");
+            }
+        } else {
+            info!("nothing!");
+        }
+        // clear msg.
+        commands.entity(pick_msg).despawn_recursive();
+    }
+}
+
+pub fn scale_map(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut tile_size: ResMut<TileSize>,
+) {
     // scale map
     if keyboard_input.just_pressed(KeyCode::Equal) {
         tile_size.0 = (tile_size.0 + 2.).min(32.);

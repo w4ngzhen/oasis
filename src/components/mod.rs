@@ -1,14 +1,14 @@
 use crate::components::position_2d::Position2d;
 use bevy::prelude::*;
 
-pub mod attributes;
-pub mod role;
 pub mod attack;
+pub mod attributes;
 pub mod bundles;
 pub mod field_of_vision;
 pub mod item;
 pub mod name;
 pub mod position_2d;
+pub mod role;
 
 /// Map tile tag
 #[derive(Component)]
@@ -44,6 +44,11 @@ pub struct GameHudCamera;
 /// 地图选择组件
 #[derive(Component, Clone, Copy)]
 pub struct MapPickCursor;
+
+#[derive(Component, Clone, Copy)]
+pub struct MapWantsToPick {
+    pub position: Position2d,
+}
 
 #[derive(Component, Clone, Copy)]
 pub struct WantsToDestroy(pub Entity);

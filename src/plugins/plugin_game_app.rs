@@ -14,13 +14,15 @@ use crate::systems::monster_action::monster_chasing;
 use crate::systems::monster_spawn::spawn_monster;
 use crate::systems::movement::movement;
 use crate::systems::player_input::{
-    player_explore_input, player_input, player_picking_input, scale_map, setup_map_exploring,
+    pick_checking, player_explore_input, player_input, player_picking_input,
+    scale_map, setup_map_exploring,
 };
 use crate::systems::player_spawn::spawn_player;
 use crate::utils::destroy_entity;
 use bevy::app::App;
 use bevy::prelude::{
-    in_state, IntoSystemConfigs, NextState, OnEnter, OnExit, OnTransition, Plugin, ResMut, Update,
+    in_state, IntoSystemConfigs, NextState, OnEnter, OnExit, OnTransition,
+    Plugin, ResMut, Update,
 };
 
 pub struct GameAppPlugin;
@@ -31,7 +33,10 @@ impl Plugin for GameAppPlugin {
             .insert_resource(TileSize(16.))
             .insert_resource(GameLog::new());
         app.add_systems(
-            OnTransition { exited: GameState::InMainMenu, entered: GameState::PrepareGame },
+            OnTransition {
+                exited: GameState::InMainMenu,
+                entered: GameState::PrepareGame,
+            },
             (
                 spawn_game_camera,
                 (setup_game_map, spawn_map_tiles).chain(),
@@ -41,7 +46,10 @@ impl Plugin for GameAppPlugin {
                 .chain(),
         );
         app.add_systems(
-            OnTransition { exited: GameState::PrepareGame, entered: GameState::InGaming },
+            OnTransition {
+                exited: GameState::PrepareGame,
+                entered: GameState::InGaming,
+            },
             (spawn_player, spawn_monster),
         );
         app.add_systems(
@@ -51,7 +59,8 @@ impl Plugin for GameAppPlugin {
         );
         app.add_systems(
             Update,
-            player_input.run_if(in_state(InGamingSubState::AwaitingPlayerInput)),
+            player_input
+                .run_if(in_state(InGamingSubState::AwaitingPlayerInput)),
         );
         app.add_systems(
             Update,
@@ -59,22 +68,42 @@ impl Plugin for GameAppPlugin {
                 .chain()
                 .run_if(in_state(InGamingSubState::PlayerAction)),
         );
-        app.add_systems(OnEnter(InGamingSubState::MapExploring), setup_map_exploring).add_systems(
+        app.add_systems(
+            OnEnter(InGamingSubState::MapExploring),
+            setup_map_exploring,
+        )
+        .add_systems(
             Update,
-            player_explore_input.run_if(in_state(InGamingSubState::MapExploring)),
+            player_explore_input
+                .run_if(in_state(InGamingSubState::MapExploring)),
         );
-        app.add_systems(OnEnter(InGamingSubState::MapPicking), spawn_map_pick_cursor)
-            .add_systems(
-                Update,
-                player_picking_input.run_if(in_state(InGamingSubState::MapPicking)),
-            )
-            .add_systems(OnExit(InGamingSubState::MapPicking), destroy_entity::<MapPickCursor>);
+        app.add_systems(
+            OnEnter(InGamingSubState::MapPicking),
+            spawn_map_pick_cursor,
+        )
+        .add_systems(
+            Update,
+            (player_picking_input, pick_checking)
+                .chain()
+                .run_if(in_state(InGamingSubState::MapPicking)),
+        )
+        .add_systems(
+            OnExit(InGamingSubState::MapPicking),
+            destroy_entity::<MapPickCursor>,
+        );
         app.add_systems(
             OnTransition {
                 exited: InGamingSubState::PlayerAction,
                 entered: InGamingSubState::MonsterAction,
             },
-            (monster_chasing, movement, handle_combat, handle_object_destroy, end_turn).chain(),
+            (
+                monster_chasing,
+                movement,
+                handle_combat,
+                handle_object_destroy,
+                end_turn,
+            )
+                .chain(),
         );
     }
 }

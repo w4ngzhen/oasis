@@ -1,7 +1,7 @@
 use crate::components::attack::WantsToAttack;
 use crate::components::attributes::Attributes;
 use crate::components::bundles::element_render_bundle;
-use crate::components::item::{Carrier, Equipped, Item, ItemCollection};
+use crate::components::item::{Carrier, Equipped, Item, ItemCollection, CONTAINER_ITEM_ID};
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::{MapTileElement, Naming, WantsToDestroy};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
@@ -70,52 +70,81 @@ pub fn handle_object_destroy(
     q_destroy: Query<(Entity, &WantsToDestroy)>,
     q_carrier: Query<(Entity, &Carrier), With<Item>>,
     q_equipped: Query<(Entity, &Equipped), With<Item>>,
-    q_name: Query<&Naming, With<Item>>,
+    // q_name: Query<&Naming, With<Item>>,
 ) {
     for (msg, destroy) in q_destroy.iter() {
         let be_destroyed_entity = destroy.0;
+
+        mb.game_map.remove_entity(be_destroyed_entity);
+        info!("{:?} died.", be_destroyed_entity);
+        // produce the items
         let be_destroyed_entity_pos =
             q_position.get(be_destroyed_entity).unwrap();
         let carried_items = get_carried_items(be_destroyed_entity, &q_carrier);
         let equipped_items =
             get_equipped_items(be_destroyed_entity, &q_equipped);
         let total_item_len = carried_items.len() + equipped_items.len();
-        let mut items: Vec<Entity> = Vec::with_capacity(total_item_len);
+        let mut all_items: Vec<Entity> = Vec::with_capacity(total_item_len);
         for item in carried_items {
-            items.push(item);
+            all_items.push(item);
         }
         for item in equipped_items {
-            items.push(item);
+            all_items.push(item);
         }
-        match total_item_len {
+        let item_pos = be_destroyed_entity_pos.clone();
+        let generated_item_info = match total_item_len {
             0 => {
                 // nothing.
+                None
             }
             1 => {
-                // only one.
-            }
-            _ => {
-                // over one.
-                commands.spawn((
-                    Item::Container,
-                    ItemCollection { items }, // render it.
+                let single_item = all_items.first().unwrap().clone();
+                commands.entity(single_item).insert((
                     MapTileElement {
                         color: Color::srgb_u8(244, 187, 120),
                         is_background: false,
                     },
-                    be_destroyed_entity_pos.clone(),
+                    item_pos.clone(), // place it at the position where the thing been destroyed.
                     PositionZIndex(2),
-                    Naming("some items.".into()),
                     element_render_bundle(
-                        get_charset_index(1, 14),
+                        get_charset_index(1, 13),
                         &charset_asset,
                     ),
                 ));
+                // only one.
+                Some(single_item)
             }
-        }
+            _ => {
+                // over one.
+                // generate a container
+                let item_collection = commands
+                    .spawn((
+                        CONTAINER_ITEM_ID,
+                        Item::Container,
+                        ItemCollection { items: all_items }, // render it.
+                        MapTileElement {
+                            color: Color::srgb_u8(244, 187, 120),
+                            is_background: false,
+                        },
+                        item_pos.clone(), // place it at the position where the thing been destroyed.
+                        PositionZIndex(2),
+                        Naming("some items.".into()),
+                        element_render_bundle(
+                            get_charset_index(14, 10),
+                            &charset_asset,
+                        ),
+                    ))
+                    .id();
+                Some(item_collection)
+            }
+        };
+        // destroy the target
         commands.entity(be_destroyed_entity).despawn_recursive();
-        mb.game_map.remove_entity(be_destroyed_entity);
-        info!("{:?} died.", be_destroyed_entity);
+        // store item
+        if let Some(item_entity) = generated_item_info {
+            mb.game_map.occupation.insert(item_pos, item_entity);
+        }
+        // clean the msg entity
         commands.entity(msg).despawn_recursive();
     }
 }
