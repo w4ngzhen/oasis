@@ -39,12 +39,17 @@ impl GameMap {
             && position.y < GAME_MAP_TILE_HEIGHT
     }
 
-    pub fn can_enter_tile<T: Into<Position2d>>(&self, position: &Position2d) -> bool {
-        self.in_bounds(position) && (self.tiles[map_idx(position.x, position.y)] == TileType::Floor)
+    pub fn can_enter_tile<T: Into<Position2d>>(
+        &self,
+        position: &Position2d,
+    ) -> bool {
+        self.in_bounds(position)
+            && (self.tiles[map_idx(position.x, position.y)] == TileType::Floor)
     }
 
     pub fn is_tile_opacity(&self, position: &Position2d) -> bool {
-        self.in_bounds(position) && self.tiles[map_idx(position.x, position.y)] == TileType::Wall
+        self.in_bounds(position)
+            && self.tiles[map_idx(position.x, position.y)] == TileType::Wall
     }
 
     pub fn is_occupied(&self, position: &Position2d) -> bool {
@@ -60,6 +65,21 @@ impl GameMap {
         }
         if let Some(pos) = target_pos {
             self.occupation.remove(&pos);
+        }
+    }
+
+    pub fn move_entity(&mut self, target_entity: Entity, next_pos: Position2d) {
+        let mut target_pos: Option<Position2d> = None;
+        for (pos, entity) in self.occupation.iter() {
+            if *entity == target_entity {
+                target_pos = Some(pos.clone());
+            }
+        }
+        if let Some(pos) = target_pos {
+            if pos != next_pos {
+                self.occupation.remove(&pos);
+                self.occupation.insert(next_pos, target_entity);
+            }
         }
     }
 

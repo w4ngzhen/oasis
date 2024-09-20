@@ -12,7 +12,7 @@ use crate::systems::game_map::{
 };
 use crate::systems::monster_action::monster_chasing;
 use crate::systems::monster_spawn::spawn_monster;
-use crate::systems::movement::movement;
+use crate::systems::movement::{monster_movement, player_movement};
 use crate::systems::player_input::{
     pick_checking, player_explore_input, player_input, player_picking_input,
     scale_map, setup_map_exploring,
@@ -64,7 +64,7 @@ impl Plugin for GameAppPlugin {
         );
         app.add_systems(
             Update,
-            (movement, handle_combat, handle_object_destroy, end_turn)
+            (player_movement, handle_combat, handle_object_destroy, end_turn)
                 .chain()
                 .run_if(in_state(InGamingSubState::PlayerAction)),
         );
@@ -98,7 +98,7 @@ impl Plugin for GameAppPlugin {
             },
             (
                 monster_chasing,
-                movement,
+                monster_movement,
                 handle_combat,
                 handle_object_destroy,
                 end_turn,

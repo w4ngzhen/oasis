@@ -17,5 +17,7 @@ pub struct MapCameraCenter(pub Option<Position2d>);
 #[derive(Resource)]
 pub struct TileSize(pub f32);
 
-
-
+#[derive(Resource, Default)]
+pub struct PlayerSettings {
+    pub auto_pick: bool,
+}
