@@ -1,9 +1,8 @@
-use crate::components::attack::WantsToAttack;
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::item::Item;
+use crate::components::msg::{WantsToAttack, WantsToMove};
 use crate::components::position_2d::Position2d;
 use crate::components::role::{Monster, Player};
-use crate::components::WantsToMove;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::resources::PlayerSettings;
 use bevy::prelude::*;

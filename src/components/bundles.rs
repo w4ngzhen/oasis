@@ -20,11 +20,7 @@ pub fn player_bundle(
             defense: 10,
             ..default()
         },
-        FieldOfVision {
-            visible_tiles: Vec::new(),
-            range: 8,
-            is_dirty_data: true,
-        },
+        FieldOfVision { ..default() },
         Position2d { x: player_init_pos.x, y: player_init_pos.y },
         PositionZIndex(2),
         element_render_bundle('@' as usize, &charset_asset),
@@ -48,11 +44,7 @@ pub fn monster_bundle(
             defense: 10,
             ..default()
         },
-        FieldOfVision {
-            visible_tiles: Vec::new(),
-            range: 8,
-            is_dirty_data: true,
-        },
+        FieldOfVision { range: 6, ..default() },
         Position2d { x: monster_init_pos.x, y: monster_init_pos.y },
         PositionZIndex(2),
         element_render_bundle('g' as usize, &charset_asset),

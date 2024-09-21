@@ -1,9 +1,9 @@
-use crate::components::attack::WantsToAttack;
 use crate::components::attributes::Attributes;
 use crate::components::bundles::element_render_bundle;
-use crate::components::item::{Carrier, Equipped, Item, ItemCollection, CONTAINER_ITEM_ID};
+use crate::components::item::{Carrier, Equipped, Item, CONTAINER_ITEM_ID};
+use crate::components::msg::{WantsToAttack, WantsToDestroy};
 use crate::components::position_2d::{Position2d, PositionZIndex};
-use crate::components::{MapTileElement, Naming, WantsToDestroy};
+use crate::components::{MapTileElement, Naming};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::core_module::GAME_MAP_TILE_WIDTH;
 use crate::resources::game_log::GameLog;
@@ -11,7 +11,6 @@ use crate::resources::CharsetAsset;
 use crate::utils::get_charset_index;
 use bevy::log::info;
 use bevy::prelude::*;
-use bevy::reflect::List;
 use bevy::render::render_resource::encase::private::RuntimeSizedArray;
 
 pub fn handle_combat(
@@ -120,8 +119,7 @@ pub fn handle_object_destroy(
                 let item_collection = commands
                     .spawn((
                         CONTAINER_ITEM_ID,
-                        Item::Container,
-                        ItemCollection { items: all_items }, // render it.
+                        Item::Container(all_items),
                         MapTileElement {
                             color: Color::srgb_u8(244, 187, 120),
                             is_background: false,

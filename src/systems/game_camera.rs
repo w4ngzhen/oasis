@@ -1,4 +1,4 @@
-use crate::components::{GameHudCamera, GameMapCamera};
+use crate::components::camera::{GameHudCamera, GameMapCamera};
 use bevy::prelude::*;
 use bevy::render::camera::Viewport;
 use bevy::render::view::RenderLayers;
@@ -15,7 +15,11 @@ pub fn spawn_game_camera(
         GameMapCamera,
         RenderLayers::layer(0),
         Camera2dBundle {
-            camera: Camera { order: 0, viewport: Some(layout.left_viewport), ..default() },
+            camera: Camera {
+                order: 0,
+                viewport: Some(layout.left_viewport),
+                ..default()
+            },
             ..default()
         },
     ));
@@ -24,7 +28,11 @@ pub fn spawn_game_camera(
         GameHudCamera,
         RenderLayers::layer(63), // 多Camera，一定要注意渲染layer
         Camera2dBundle {
-            camera: Camera { order: 999, viewport: Some(layout.right_viewport), ..default() },
+            camera: Camera {
+                order: 999,
+                viewport: Some(layout.right_viewport),
+                ..default()
+            },
             ..default()
         },
     ));
@@ -34,7 +42,10 @@ pub fn update_game_camera(
     query_window: Query<&Window, With<PrimaryWindow>>,
     mut resize_event: EventReader<WindowResized>,
     mut query_map_camera: Query<&mut Camera, With<GameMapCamera>>,
-    mut query_hud_camera: Query<&mut Camera, (With<GameHudCamera>, Without<GameMapCamera>)>,
+    mut query_hud_camera: Query<
+        &mut Camera,
+        (With<GameHudCamera>, Without<GameMapCamera>),
+    >,
 ) {
     for resized in resize_event.read() {
         if let Ok(win) = query_window.get(resized.window) {

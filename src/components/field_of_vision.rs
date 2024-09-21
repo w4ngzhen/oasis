@@ -9,3 +9,9 @@ pub struct FieldOfVision {
     /// when "false" , means you should update the visible_tiles
     pub is_dirty_data: bool,
 }
+
+impl Default for FieldOfVision {
+    fn default() -> Self {
+        Self { visible_tiles: Vec::new(), range: 8, is_dirty_data: true }
+    }
+}

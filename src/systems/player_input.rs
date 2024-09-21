@@ -1,11 +1,12 @@
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position_2d::Position2d;
 use crate::components::role::Player;
-use crate::components::{MapPickCursor, MapWantsToPick, Naming, WantsToMove};
+use crate::components::{MapPickCursor, Naming};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::game_state::InGamingSubState;
 use crate::resources::{MapCameraCenter, TileSize};
 use bevy::prelude::*;
+use crate::components::msg::{MapWantsToPick, WantsToMove};
 
 pub fn player_input(
     mut commands: Commands,

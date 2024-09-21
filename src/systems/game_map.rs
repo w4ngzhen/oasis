@@ -1,7 +1,8 @@
 use crate::components::field_of_vision::FieldOfVision;
+use crate::components::msg::MapWantsToPick;
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::role::Player;
-use crate::components::{MapPickCursor, MapTileElement, MapWantsToPick};
+use crate::components::{MapPickCursor, MapTileElement};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::core_module::game_map::themes::{
     tile_to_render_descriptor, TileRenderDescriptor,

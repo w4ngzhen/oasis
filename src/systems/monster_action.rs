@@ -1,12 +1,12 @@
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position_2d::Position2d;
 use crate::components::role::{Monster, Player};
-use crate::components::WantsToMove;
 use crate::core_module::game_map::game_map::GameMap;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::game_state::InGamingSubState;
 use bevy::prelude::*;
 use pathfinding::prelude::astar;
+use crate::components::msg::WantsToMove;
 
 pub fn monster_chasing(
     mut commands: Commands,

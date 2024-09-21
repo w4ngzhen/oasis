@@ -2,24 +2,19 @@ use crate::components::role::RolePart;
 use bevy::prelude::{Component, Entity};
 
 #[derive(Component, Default)]
-pub struct ItemCollection {
-    pub items: Vec<Entity>,
-}
-
-#[derive(Component, Default)]
 pub enum Item {
     #[default]
     Normal,
     Weapon(RolePart),
     Medicine,
     Scroll,
-    Container,
+    Container(Vec<Entity>),
 }
 
 #[derive(Component, Copy, Clone)]
 pub struct ItemId(pub i32);
 
-pub const CONTAINER_ITEM_ID: ItemId = ItemId(0x99);
+pub const CONTAINER_ITEM_ID: ItemId = ItemId(0x0999);
 
 /// 被谁携带
 #[derive(Component)]
