@@ -22,14 +22,16 @@ use crate::systems::setup::setup_charset_assets;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()).set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "Oasis".to_string(),
-                resolution: (800., 600.).into(),
+        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()).set(
+            WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Oasis".to_string(),
+                    resolution: (800., 600.).into(),
+                    ..Default::default()
+                }),
                 ..Default::default()
-            }),
-            ..Default::default()
-        }))
+            },
+        ))
         // .insert_resource(ClearColor(Color::Srgba(Srgba::new(1., 0.5, 0.5, 1.))))
         .add_systems(Startup, setup_charset_assets)
         .add_plugins(GameAppPlugin)
