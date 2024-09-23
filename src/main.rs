@@ -27,9 +27,9 @@ fn main() {
                 primary_window: Some(Window {
                     title: "Oasis".to_string(),
                     resolution: (800., 600.).into(),
-                    ..Default::default()
+                    ..default()
                 }),
-                ..Default::default()
+                ..default()
             },
         ))
         .add_systems(Startup, setup_charset_assets)
