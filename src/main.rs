@@ -32,7 +32,6 @@ fn main() {
                 ..Default::default()
             },
         ))
-        // .insert_resource(ClearColor(Color::Srgba(Srgba::new(1., 0.5, 0.5, 1.))))
         .add_systems(Startup, setup_charset_assets)
         .add_plugins(GameAppPlugin)
         .add_plugins(PlayerPlugin)
