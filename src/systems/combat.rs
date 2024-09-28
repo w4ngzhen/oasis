@@ -101,7 +101,7 @@ pub fn handle_object_destroy(
                 commands.entity(single_item).insert((
                     MapTileElement {
                         color: Color::srgb_u8(244, 187, 120),
-                        is_background: false,
+                        ..default()
                     },
                     item_pos.clone(), // place it at the position where the thing been destroyed.
                     PositionZIndex(2),
@@ -122,7 +122,7 @@ pub fn handle_object_destroy(
                         Item::Container(all_items),
                         MapTileElement {
                             color: Color::srgb_u8(244, 187, 120),
-                            is_background: false,
+                            ..default()
                         },
                         item_pos.clone(), // place it at the position where the thing been destroyed.
                         PositionZIndex(2),

@@ -1,3 +1,4 @@
+use crate::components::map_tile::MapElementType;
 use crate::components::position_2d::Position2d;
 use crate::core_module::*;
 use bevy::prelude::*;
@@ -5,17 +6,9 @@ use std::collections::HashMap;
 
 const NUM_TILES: i32 = GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT;
 
-#[derive(Copy, Clone, PartialEq)]
-pub enum TileType {
-    Wall,
-    Floor,
-    /// 无法到达的地方
-    Void,
-}
-
 pub struct GameMap {
     /// 地图上的Wall、Floor、Void（虚空）是固定资源，所以不是实体Entity
-    pub tiles: Vec<TileType>,
+    pub tiles: Vec<MapElementType>,
     /// 见过的tile
     pub visited_tiles: Vec<bool>,
     /// 地图上某些地方占据的东西是实体Entity
@@ -26,7 +19,7 @@ pub struct GameMap {
 impl GameMap {
     pub fn new() -> Self {
         Self {
-            tiles: vec![TileType::Void; NUM_TILES as usize],
+            tiles: vec![MapElementType::Void; NUM_TILES as usize],
             visited_tiles: vec![false; NUM_TILES as usize],
             occupation: HashMap::new(),
         }
@@ -44,12 +37,14 @@ impl GameMap {
         position: &Position2d,
     ) -> bool {
         self.in_bounds(position)
-            && (self.tiles[map_idx(position.x, position.y)] == TileType::Floor)
+            && (self.tiles[map_idx(position.x, position.y)]
+                == MapElementType::Floor)
     }
 
     pub fn is_tile_opacity(&self, position: &Position2d) -> bool {
         self.in_bounds(position)
-            && self.tiles[map_idx(position.x, position.y)] == TileType::Wall
+            && self.tiles[map_idx(position.x, position.y)]
+                == MapElementType::Wall
     }
 
     pub fn is_occupied(&self, position: &Position2d) -> bool {

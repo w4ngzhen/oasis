@@ -1,10 +1,11 @@
-use crate::core_module::game_map::game_map::{GameMap, TileType};
+use crate::core_module::game_map::game_map::{GameMap };
 use crate::core_module::game_map::tile_rect::TileRect;
 use crate::core_module::*;
 use crate::utils::rand_gen::RandGen;
 use bevy::prelude::*;
 use rand::Rng;
 use std::cmp::{max, min};
+use crate::components::map_tile::MapElementType;
 
 const MAX_ROOMS: usize = 10;
 const MIN_ROOM_SIZE: i32 = 6;
@@ -18,13 +19,14 @@ pub struct GameMapBuilder {
 
 impl GameMapBuilder {
     pub fn new() -> Self {
-        let mut mb = GameMapBuilder { game_map: GameMap::new(), rooms: Vec::new() };
-        mb.fill(TileType::Wall);
+        let mut mb =
+            GameMapBuilder { game_map: GameMap::new(), rooms: Vec::new() };
+        mb.fill(MapElementType::Wall);
         mb.build_rooms();
         mb
     }
 
-    fn fill(&mut self, tile: TileType) {
+    fn fill(&mut self, tile: MapElementType) {
         self.game_map.tiles.iter_mut().for_each(|t| *t = tile);
     }
 
@@ -48,8 +50,10 @@ impl GameMapBuilder {
                 self.apply_room_to_map(&new_room);
                 if !generated_rooms.is_empty() {
                     let (new_x, new_y) = new_room.center().to_tuple();
-                    let (prev_x, prev_y) =
-                        generated_rooms[generated_rooms.len() - 1].center().to_tuple();
+                    let (prev_x, prev_y) = generated_rooms
+                        [generated_rooms.len() - 1]
+                        .center()
+                        .to_tuple();
                     if rng.range(0, 2) == 1 {
                         self.apply_horizontal_tunnel(prev_x, new_x, prev_y);
                         self.apply_vertical_tunnel(prev_y, new_y, new_x);
@@ -72,7 +76,7 @@ impl GameMapBuilder {
         let rb = room.right_bottom();
         for y in lt.y + 1..=rb.y {
             for x in lt.x + 1..=rb.x {
-                (*map_tiles)[map_idx(x, y)] = TileType::Floor;
+                map_tiles[map_idx(x, y)] = MapElementType::Floor;
             }
         }
     }
@@ -81,8 +85,10 @@ impl GameMapBuilder {
         let map_tiles = &mut self.game_map.tiles;
         for x in min(x1, x2)..=max(x1, x2) {
             let idx = map_idx(x, y);
-            if idx > 0 && idx < (GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT) as usize {
-                map_tiles[idx] = TileType::Floor;
+            if idx > 0
+                && idx < (GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT) as usize
+            {
+                map_tiles[idx] = MapElementType::Floor;
             }
         }
     }
@@ -91,8 +97,10 @@ impl GameMapBuilder {
         let map_tiles = &mut self.game_map.tiles;
         for y in min(y1, y2)..=max(y1, y2) {
             let idx = map_idx(x, y);
-            if idx > 0 && idx < (GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT) as usize {
-                map_tiles[idx] = TileType::Floor;
+            if idx > 0
+                && idx < (GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT) as usize
+            {
+                map_tiles[idx] = MapElementType::Floor;
             }
         }
     }

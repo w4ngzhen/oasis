@@ -12,7 +12,7 @@ pub fn player_bundle(
 ) -> impl Bundle {
     (
         Player,
-        MapTileElement { color: Color::WHITE, is_background: false },
+        MapTileElement { color: Color::WHITE, ..default() },
         Attributes {
             max_hp: 100,
             current_hp: 100,
@@ -32,10 +32,7 @@ pub fn monster_bundle(
     charset_asset: &Res<CharsetAsset>,
 ) -> impl Bundle {
     (
-        MapTileElement {
-            color: Color::srgba(0., 1., 0., 1.),
-            is_background: false,
-        },
+        MapTileElement { color: Color::srgba(0., 1., 0., 1.), ..default() },
         Monster,
         Attributes {
             max_hp: 20,

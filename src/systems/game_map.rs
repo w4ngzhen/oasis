@@ -19,7 +19,7 @@ pub fn setup_game_map(mut commands: Commands) {
     commands.insert_resource(mb);
 }
 
-pub fn spawn_map_tiles(
+pub fn spawn_map(
     mut commands: Commands,
     mb: Res<GameMapBuilder>,
     charset_asset: Res<CharsetAsset>,
@@ -32,15 +32,14 @@ pub fn spawn_map_tiles(
                 tile_to_render_descriptor(mb.game_map.tiles[idx]);
 
             if let Some(render_descriptor) = render_descriptor {
-                utils_spawn_map_tile_sprite::<()>(
-                    &mut commands,
+                let bundle = map_element_bundle(
                     &charset_asset,
                     &render_descriptor,
                     &Position2d::new(x, y),
                     1,
                     Visibility::Hidden, // default hidden
-                    None,
                 );
+                commands.spawn(bundle);
             }
         }
     }
@@ -52,19 +51,17 @@ pub fn spawn_map_pick_cursor(
     charset_asset: Res<CharsetAsset>,
 ) {
     if let Ok(player_pos) = query_player.get_single() {
-        utils_spawn_map_tile_sprite(
-            &mut commands,
+        let bundle = map_element_bundle(
             &charset_asset,
             &TileRenderDescriptor::new(
                 get_charset_index(14, 0),
                 Color::srgba(1., 1., 1., 0.5),
-                None,
             ),
             &Position2d { x: player_pos.x, y: player_pos.y },
             999,
             Visibility::Visible,
-            Some(MapPickCursor),
         );
+        commands.spawn(bundle).insert(MapPickCursor);
         // at the same time, spawn an init WantsToPick msg.
         commands.spawn(MapWantsToPick { position: player_pos.clone() });
     } else {
@@ -72,40 +69,15 @@ pub fn spawn_map_pick_cursor(
     }
 }
 
-fn utils_spawn_map_tile_sprite<TBundle>(
-    commands: &mut Commands,
+fn map_element_bundle(
     charset_asset: &Res<CharsetAsset>,
     tile_render_descriptor: &TileRenderDescriptor,
     pos: &Position2d,
     z_index: i32,
     visibility: Visibility,
-    extend_bundle: Option<TBundle>,
-) where
-    TBundle: Bundle,
-{
-    // 背景色
-    if let Some(bg_color) = tile_render_descriptor.bg_color {
-        commands.spawn((
-            MapTileElement { color: bg_color, is_background: true },
-            Position2d { x: pos.x, y: pos.y }, // z = 0, background.
-            PositionZIndex(0),                 // background always.
-            SpriteBundle {
-                sprite: Sprite {
-                    color: bg_color,
-                    // 所有的图块初始都是 1x1的尺寸
-                    // 我们会在相关系统中进行缩放处理
-                    custom_size: Some(Vec2::new(1., 1.)),
-                    ..Default::default()
-                },
-                ..Default::default()
-            },
-        ));
-    }
-    let mut cmds = commands.spawn((
-        MapTileElement {
-            color: tile_render_descriptor.color,
-            is_background: false,
-        },
+) -> impl Bundle {
+    (
+        MapTileElement { color: tile_render_descriptor.color, ..default() },
         Position2d { x: pos.x, y: pos.y },
         PositionZIndex(z_index),
         SpriteBundle {
@@ -124,10 +96,7 @@ fn utils_spawn_map_tile_sprite<TBundle>(
             layout: charset_asset.atlas.clone(),
             index: tile_render_descriptor.tile_index,
         },
-    ));
-    if let Some(bundle) = extend_bundle {
-        cmds.insert(bundle);
-    }
+    )
 }
 /// 渲染地图内容，其核心是将相关TileElement放置到对应位置
 pub fn render_map_tile(
@@ -180,11 +149,7 @@ pub fn render_map_tile(
                     // you can see, but it's an object on map(not wall or floor)
                     (Visibility::Hidden, true)
                 } else {
-                    if tile_ele.is_background {
-                        (Visibility::Hidden, true)
-                    } else {
-                        (Visibility::Visible, true)
-                    }
+                    (Visibility::Visible, true)
                 }
             } else {
                 (Visibility::Hidden, false)

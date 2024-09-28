@@ -8,7 +8,7 @@ use crate::systems::fov::fov;
 use crate::systems::game_camera::{spawn_game_camera, update_game_camera};
 use crate::systems::game_hud::spawn_game_hud;
 use crate::systems::game_map::{
-    render_map_tile, setup_game_map, spawn_map_pick_cursor, spawn_map_tiles,
+    render_map_tile, setup_game_map, spawn_map_pick_cursor, spawn_map,
 };
 use crate::systems::monster_action::monster_chasing;
 use crate::systems::monster_spawn::spawn_monster;
@@ -39,7 +39,7 @@ impl Plugin for GameAppPlugin {
             },
             (
                 spawn_game_camera,
-                (setup_game_map, spawn_map_tiles).chain(),
+                (setup_game_map, spawn_map).chain(),
                 spawn_game_hud,
                 finish_prepare_game,
             )
