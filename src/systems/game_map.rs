@@ -1,4 +1,6 @@
+use crate::components::bundles::element_render_bundle;
 use crate::components::field_of_vision::FieldOfVision;
+use crate::components::map_element::MapElementProperty;
 use crate::components::msg::MapWantsToPick;
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::role::Player;
@@ -23,23 +25,31 @@ pub fn spawn_map(
     mut commands: Commands,
     mb: Res<GameMapBuilder>,
     charset_asset: Res<CharsetAsset>,
-    mut _next_state: ResMut<NextState<GameState>>,
 ) {
     for y in 0..GAME_MAP_TILE_HEIGHT {
         for x in 0..GAME_MAP_TILE_WIDTH {
             let idx = map_idx(x, y);
             let render_descriptor =
-                tile_to_render_descriptor(mb.game_map.tiles[idx]);
+                tile_to_render_descriptor(mb.game_map.elements[idx]);
 
             if let Some(render_descriptor) = render_descriptor {
-                let bundle = map_element_bundle(
-                    &charset_asset,
-                    &render_descriptor,
-                    &Position2d::new(x, y),
-                    1,
-                    Visibility::Hidden, // default hidden
-                );
-                commands.spawn(bundle);
+                let map_ele = mb.game_map.elements[idx];
+                commands
+                    .spawn((
+                        map_ele,
+                        MapElementProperty::get(map_ele),
+                        MapTileElement {
+                            color: render_descriptor.color,
+                            ..default()
+                        },
+                        Position2d::new(x, y),
+                        PositionZIndex(1),
+                        element_render_bundle(
+                            render_descriptor.tile_index,
+                            &charset_asset,
+                        ),
+                    ))
+                    .insert(Visibility::Hidden);
             }
         }
     }
@@ -51,17 +61,14 @@ pub fn spawn_map_pick_cursor(
     charset_asset: Res<CharsetAsset>,
 ) {
     if let Ok(player_pos) = query_player.get_single() {
-        let bundle = map_element_bundle(
-            &charset_asset,
-            &TileRenderDescriptor::new(
-                get_charset_index(14, 0),
-                Color::srgba(1., 1., 1., 0.5),
-            ),
-            &Position2d { x: player_pos.x, y: player_pos.y },
-            999,
+        commands.spawn((
+            MapPickCursor,
+            MapTileElement { color: Color::srgba(1., 1., 1., 0.5) },
+            Position2d::new(player_pos.x, player_pos.y),
+            PositionZIndex(999),
             Visibility::Visible,
-        );
-        commands.spawn(bundle).insert(MapPickCursor);
+            element_render_bundle(get_charset_index(14, 0), &charset_asset),
+        ));
         // at the same time, spawn an init WantsToPick msg.
         commands.spawn(MapWantsToPick { position: player_pos.clone() });
     } else {
@@ -69,35 +76,6 @@ pub fn spawn_map_pick_cursor(
     }
 }
 
-fn map_element_bundle(
-    charset_asset: &Res<CharsetAsset>,
-    tile_render_descriptor: &TileRenderDescriptor,
-    pos: &Position2d,
-    z_index: i32,
-    visibility: Visibility,
-) -> impl Bundle {
-    (
-        MapTileElement { color: tile_render_descriptor.color, ..default() },
-        Position2d { x: pos.x, y: pos.y },
-        PositionZIndex(z_index),
-        SpriteBundle {
-            visibility,
-            sprite: Sprite {
-                color: tile_render_descriptor.color,
-                // 所有的图块初始都是 1x1的尺寸
-                // 我们会在相关系统中进行缩放处理
-                custom_size: Some(Vec2::new(1., 1.)),
-                ..Default::default()
-            },
-            texture: charset_asset.texture.clone(),
-            ..Default::default()
-        },
-        TextureAtlas {
-            layout: charset_asset.atlas.clone(),
-            index: tile_render_descriptor.tile_index,
-        },
-    )
-}
 /// 渲染地图内容，其核心是将相关TileElement放置到对应位置
 pub fn render_map_tile(
     mut q: Query<(

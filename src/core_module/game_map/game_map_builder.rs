@@ -5,7 +5,7 @@ use crate::utils::rand_gen::RandGen;
 use bevy::prelude::*;
 use rand::Rng;
 use std::cmp::{max, min};
-use crate::components::map_tile::MapElementType;
+use crate::components::map_element::MapElement;
 
 const MAX_ROOMS: usize = 10;
 const MIN_ROOM_SIZE: i32 = 6;
@@ -21,13 +21,13 @@ impl GameMapBuilder {
     pub fn new() -> Self {
         let mut mb =
             GameMapBuilder { game_map: GameMap::new(), rooms: Vec::new() };
-        mb.fill(MapElementType::Wall);
+        mb.fill(MapElement::Wall);
         mb.build_rooms();
         mb
     }
 
-    fn fill(&mut self, tile: MapElementType) {
-        self.game_map.tiles.iter_mut().for_each(|t| *t = tile);
+    fn fill(&mut self, tile: MapElement) {
+        self.game_map.elements.iter_mut().for_each(|t| *t = tile);
     }
 
     fn build_rooms(&mut self) {
@@ -71,36 +71,36 @@ impl GameMapBuilder {
     }
 
     fn apply_room_to_map(&mut self, room: &TileRect) {
-        let map_tiles = &mut self.game_map.tiles;
+        let map_tiles = &mut self.game_map.elements;
         let lt = room.left_top();
         let rb = room.right_bottom();
         for y in lt.y + 1..=rb.y {
             for x in lt.x + 1..=rb.x {
-                map_tiles[map_idx(x, y)] = MapElementType::Floor;
+                map_tiles[map_idx(x, y)] = MapElement::Floor;
             }
         }
     }
 
     fn apply_horizontal_tunnel(&mut self, x1: i32, x2: i32, y: i32) {
-        let map_tiles = &mut self.game_map.tiles;
+        let map_tiles = &mut self.game_map.elements;
         for x in min(x1, x2)..=max(x1, x2) {
             let idx = map_idx(x, y);
             if idx > 0
                 && idx < (GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT) as usize
             {
-                map_tiles[idx] = MapElementType::Floor;
+                map_tiles[idx] = MapElement::Floor;
             }
         }
     }
 
     fn apply_vertical_tunnel(&mut self, y1: i32, y2: i32, x: i32) {
-        let map_tiles = &mut self.game_map.tiles;
+        let map_tiles = &mut self.game_map.elements;
         for y in min(y1, y2)..=max(y1, y2) {
             let idx = map_idx(x, y);
             if idx > 0
                 && idx < (GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT) as usize
             {
-                map_tiles[idx] = MapElementType::Floor;
+                map_tiles[idx] = MapElement::Floor;
             }
         }
     }
