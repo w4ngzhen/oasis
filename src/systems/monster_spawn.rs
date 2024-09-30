@@ -32,9 +32,6 @@ pub fn spawn_monster(
         info!("generate {}", monster_name.0);
         monster_idx += 1;
     });
-    pos_map.iter().for_each(|(pos, entity)| {
-        mb.game_map.occupation.insert(*pos, *entity);
-    })
 }
 /// 给怪物添加装备以及携带的物品
 fn generate_monster_some_items(cmds: &mut Commands, monster_entity: Entity) {

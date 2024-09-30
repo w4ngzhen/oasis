@@ -1,5 +1,6 @@
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::item::Item;
+use crate::components::map_element::{MapElement, MapElementProp};
 use crate::components::msg::{WantsToAttack, WantsToMove};
 use crate::components::position_2d::Position2d;
 use crate::components::role::{Monster, Player};
@@ -17,29 +18,43 @@ pub fn player_movement(
     >,
     q_item: Query<(Entity), With<Item>>,
     q_monster: Query<(Entity), With<Monster>>,
+    q_map_ele_prop: Query<
+        (Entity, &MapElementProp, &Position2d),
+        With<MapElement>,
+    >,
     mut map: ResMut<GameMapBuilder>,
 ) {
-    for (movement_msg, wants_to_move) in q_movement_msg.iter() {
+    for (msg, wants_to_move) in q_movement_msg.iter() {
         let next_pos = wants_to_move.destination;
         if let Ok((player_entity, mut player_fov, mut player_pos)) =
             q_player_mover.get_mut(wants_to_move.entity)
         {
-            // check the movement is valid
-            if map.game_map.in_bounds(&next_pos)
-                && !map.game_map.is_tile_opacity(&next_pos)
-                && map.game_map.occupation.get(&next_pos).is_none()
-            {
+            // 首先检查移动是否合理
+            // 1. 是否在地图大范围
+            let is_inbounds = map.game_map.in_bounds(&next_pos);
+            // 2. 将要移动的到的地方是否被其他带有碰撞的物品占据了
+            let occupied_entity: Option<Entity> = if let Some(some_occupied) =
+                q_map_ele_prop.iter().find_map(|(entity, prop, pos)| {
+                    if *pos == next_pos && prop.is_collision {
+                        Some(Some(entity))
+                    } else {
+                        None
+                    }
+                }) {
+                some_occupied
+            } else {
+                None
+            };
+
+            if is_inbounds && occupied_entity.is_none() {
                 // 在地图上，将玩家实体移动到新的位置
-                map.game_map.move_entity(player_entity, next_pos);
-                // 如果正在移动的实体是地图上的occupation中的，则需要调整对应的位置
                 player_pos.x = next_pos.x;
                 player_pos.y = next_pos.y;
                 player_fov.is_dirty_data = true;
-            } else if let Some(target) = map.game_map.occupation.get(&next_pos)
-            {
+            } else if let Some(target) = occupied_entity {
                 if q_monster.get(target.clone()).is_ok() {
                     // 对怪物产生一次攻击
-                    info!("attack");
+                    info!("attack monster!");
                     commands.spawn(WantsToAttack {
                         attacker: player_entity,
                         target: Some(target.clone()),
@@ -47,13 +62,14 @@ pub fn player_movement(
                 } else if q_item.get(target.clone()).is_ok() {
                     // 如果开启了自动拾取，则触发一次PickUp
                     if player_settings.auto_pick {
+                        // todo
                         info!("pick up a things");
                     }
                 }
             }
         }
         // delete movement Component
-        commands.entity(movement_msg).despawn();
+        commands.entity(msg).despawn();
     }
 }
 
@@ -66,28 +82,42 @@ pub fn monster_movement(
         With<Monster>,
     >,
     q_player: Query<Entity, With<Player>>,
+    q_map_ele_prop: Query<
+        (Entity, &MapElementProp, &Position2d),
+        With<MapElement>,
+    >,
 ) {
     for (movement_msg, wants_to_move) in q_movement_msg.iter() {
         let next_pos = wants_to_move.destination;
         if let Ok((monster_entity, mut monster_fov, mut monster_pos)) =
             q_monster_mover.get_mut(wants_to_move.entity)
         {
+            // 首先检查移动是否合理
+            // 1. 是否在地图大范围
+            let is_inbounds = map.game_map.in_bounds(&next_pos);
+            // 2. 将要移动的到的地方是否被其他带有碰撞的物品占据了
+            let occupied_entity: Option<Entity> = if let Some(some_occupied) =
+                q_map_ele_prop.iter().find_map(|(entity, prop, pos)| {
+                    if *pos == next_pos && prop.is_collision {
+                        Some(Some(entity))
+                    } else {
+                        None
+                    }
+                }) {
+                some_occupied
+            } else {
+                None
+            };
             // check the movement is valid
-            if map.game_map.in_bounds(&next_pos)
-                && !map.game_map.is_tile_opacity(&next_pos)
-                && map.game_map.occupation.get(&next_pos).is_none()
-            {
-                // 在地图上，将玩家实体移动到新的位置
-                map.game_map.move_entity(monster_entity, next_pos);
-                // 如果正在移动的实体是地图上的occupation中的，则需要调整对应的位置
+            if is_inbounds && occupied_entity.is_none() {
+                // 在地图上，将monster实体移动到新的位置
                 monster_pos.x = next_pos.x;
                 monster_pos.y = next_pos.y;
                 monster_fov.is_dirty_data = true;
-            } else if let Some(target) = map.game_map.occupation.get(&next_pos)
-            {
+            } else if let Some(target) = occupied_entity {
                 if q_player.get(target.clone()).is_ok() {
-                    // 对怪物产生一次攻击
-                    info!("attack");
+                    // 对玩家产生一次攻击
+                    info!("attack player!");
                     commands.spawn(WantsToAttack {
                         attacker: monster_entity,
                         target: Some(target.clone()),

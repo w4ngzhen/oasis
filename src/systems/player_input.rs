@@ -1,4 +1,6 @@
 use crate::components::field_of_vision::FieldOfVision;
+use crate::components::map_element::MapElement;
+use crate::components::msg::{MapWantsToPick, WantsToMove};
 use crate::components::position_2d::Position2d;
 use crate::components::role::Player;
 use crate::components::{MapPickCursor, Naming};
@@ -6,7 +8,6 @@ use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::game_state::InGamingSubState;
 use crate::resources::{MapCameraCenter, TileSize};
 use bevy::prelude::*;
-use crate::components::msg::{MapWantsToPick, WantsToMove};
 
 pub fn player_input(
     mut commands: Commands,
@@ -115,7 +116,7 @@ pub fn player_picking_input(
             let fov = q_fov.single();
             if next_pick_cursor_pos != *pick_cursor_pos
                 && map_builder.game_map.in_bounds(&next_pick_cursor_pos)
-                && fov.visible_tiles.contains(&next_pick_cursor_pos)
+                && fov.visible_positions.contains(&next_pick_cursor_pos)
             {
                 *pick_cursor_pos = next_pick_cursor_pos;
                 // generate a pick msg
@@ -129,22 +130,28 @@ pub fn player_picking_input(
 pub fn pick_checking(
     mut commands: Commands,
     q_pick: Query<(Entity, &MapWantsToPick)>,
-    q_name: Query<(&Naming)>,
+    q_map_ele: Query<(Entity, &Position2d), With<MapElement>>,
+    q_name: Query<&Naming>,
     mb: Res<GameMapBuilder>,
 ) {
     for (pick_msg, wants_to_pick) in q_pick.iter() {
         info!("check {:?}", wants_to_pick.position);
-        if let Some(item) = mb.game_map.occupation.get(&wants_to_pick.position)
-        {
-            if let Ok(name) = q_name.get(item.clone()) {
+        let entities = q_map_ele.iter().filter_map(|(ent, pos)| {
+            if *pos == wants_to_pick.position {
+                Some(ent)
+            } else {
+                None
+            }
+        });
+        for ent in entities {
+            if let Ok(name) = q_name.get(ent) {
                 info!("there is: {}", name.0);
             } else {
                 info!("there is something but no name.");
             }
-        } else {
-            info!("nothing!");
         }
-        // clear msg.
+        // info!("nothing!");
+        // 清理消息
         commands.entity(pick_msg).despawn_recursive();
     }
 }

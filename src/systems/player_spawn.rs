@@ -16,10 +16,7 @@ pub fn spawn_player(
     if let Some(first_room) = mb.rooms.first() {
         let player_init_pos = first_room.center();
         // spawn
-        let player_entity =
-            commands.spawn(player_bundle(player_init_pos, &charset_asset)).id();
-        // record player
-        mb.game_map.occupation.insert(player_init_pos, player_entity);
+        commands.spawn(player_bundle(player_init_pos, &charset_asset));
     } else {
         warn!("Attempted to spawn a player without a room.")
     }

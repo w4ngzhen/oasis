@@ -1,6 +1,7 @@
 use crate::components::attributes::Attributes;
 use crate::components::bundles::element_render_bundle;
 use crate::components::item::{Carrier, Equipped, Item, CONTAINER_ITEM_ID};
+use crate::components::map_element::{MapElement, MapElementProp};
 use crate::components::msg::{WantsToAttack, WantsToDestroy};
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::{MapTileElement, Naming};
@@ -74,12 +75,13 @@ pub fn handle_object_destroy(
     for (msg, destroy) in q_destroy.iter() {
         let be_destroyed_entity = destroy.0;
 
-        mb.game_map.remove_entity(be_destroyed_entity);
         info!("{:?} died.", be_destroyed_entity);
-        // produce the items
+        // 爆装备、爆物品
         let be_destroyed_entity_pos =
             q_position.get(be_destroyed_entity).unwrap();
+        // 携带的物品
         let carried_items = get_carried_items(be_destroyed_entity, &q_carrier);
+        // 装备的物品
         let equipped_items =
             get_equipped_items(be_destroyed_entity, &q_equipped);
         let total_item_len = carried_items.len() + equipped_items.len();
@@ -99,11 +101,17 @@ pub fn handle_object_destroy(
             1 => {
                 let single_item = all_items.first().unwrap().clone();
                 commands.entity(single_item).insert((
+                    MapElement::MapItem,
+                    MapElementProp {
+                        // 暂时这样设计
+                        is_collision: false,
+                        is_block_view: false,
+                    },
                     MapTileElement {
                         color: Color::srgb_u8(244, 187, 120),
                         ..default()
                     },
-                    item_pos.clone(), // place it at the position where the thing been destroyed.
+                    item_pos.clone(), // 将物品放置到对应位置
                     PositionZIndex(2),
                     element_render_bundle(
                         get_charset_index(1, 13),
@@ -119,12 +127,18 @@ pub fn handle_object_destroy(
                 let item_collection = commands
                     .spawn((
                         CONTAINER_ITEM_ID,
+                        MapElement::MapItem,
+                        MapElementProp {
+                            // 暂时这样设计
+                            is_collision: false,
+                            is_block_view: false,
+                        },
                         Item::Container(all_items),
                         MapTileElement {
                             color: Color::srgb_u8(244, 187, 120),
                             ..default()
                         },
-                        item_pos.clone(), // place it at the position where the thing been destroyed.
+                        item_pos.clone(), // 将物品放置到对应位置
                         PositionZIndex(2),
                         Naming("some items.".into()),
                         element_render_bundle(
@@ -136,13 +150,9 @@ pub fn handle_object_destroy(
                 Some(item_collection)
             }
         };
-        // destroy the target
+        // 清理掉这个被摧毁的实体
         commands.entity(be_destroyed_entity).despawn_recursive();
-        // store item
-        if let Some(item_entity) = generated_item_info {
-            mb.game_map.occupation.insert(item_pos, item_entity);
-        }
-        // clean the msg entity
+        // 清理消息
         commands.entity(msg).despawn_recursive();
     }
 }

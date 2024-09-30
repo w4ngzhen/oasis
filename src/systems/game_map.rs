@@ -1,6 +1,6 @@
 use crate::components::bundles::element_render_bundle;
 use crate::components::field_of_vision::FieldOfVision;
-use crate::components::map_element::MapElementProperty;
+use crate::components::map_element::{MapElement, MapElementProp};
 use crate::components::msg::MapWantsToPick;
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::role::Player;
@@ -37,7 +37,7 @@ pub fn spawn_map(
                 commands
                     .spawn((
                         map_ele,
-                        MapElementProperty::get(map_ele),
+                        MapElementProp::get(map_ele),
                         MapTileElement {
                             color: render_descriptor.color,
                             ..default()
@@ -78,8 +78,9 @@ pub fn spawn_map_pick_cursor(
 
 /// 渲染地图内容，其核心是将相关TileElement放置到对应位置
 pub fn render_map_tile(
-    mut q: Query<(
+    mut q_map_ele: Query<(
         Entity,
+        &MapElement,
         &MapTileElement,
         &Position2d,
         &PositionZIndex,
@@ -106,33 +107,37 @@ pub fn render_map_tile(
     );
     for (
         ele_entity,
+        map_ele,
         tile_ele,
         ele_pos,
         ele_z_idx,
         mut ele_visibility,
         mut transform,
         mut sprite,
-    ) in q.iter_mut()
+    ) in q_map_ele.iter_mut()
     {
-        let (visibility, is_visited_tile): (Visibility, bool) =
-            if player_fov.visible_tiles.iter().any(|pos| *pos == *ele_pos) {
-                (Visibility::Visible, false)
-            } else if mb.game_map.visited_tiles[map_idx(ele_pos.x, ele_pos.y)] {
-                if mb
-                    .game_map
-                    .occupation
-                    .values()
-                    .any(|occupation| *occupation == ele_entity)
-                {
-                    // you can see, but it's an object on map(not wall or floor)
-                    (Visibility::Hidden, true)
-                } else {
-                    (Visibility::Visible, true)
-                }
+        // 渲染地图上的元素，这些元素有些当前视野能看到的，有些是曾经看到过的地方
+        let (visibility, is_visited_tile): (Visibility, bool) = if player_fov
+            .visible_positions
+            .iter()
+            .any(|pos| *pos == *ele_pos)
+        {
+            // 当前玩家能看到的，则需要展示，且标记它为非见过的位置
+            (Visibility::Visible, false)
+        } else if mb.game_map.visited_positions.contains(ele_pos) {
+            // 除了玩家当前正看到的，剩余“看过”的地方
+            // 因为玩家正看大到的，肯定属于“看过”的，所以这里只会有其余“看过”的
+            // “看过”的位置，我们仅会展示墙壁、地面，其余都将进入迷雾
+           if *map_ele == MapElement::Floor || *map_ele == MapElement::Wall {
+                (Visibility::Visible, true)
             } else {
-                (Visibility::Hidden, false)
-            };
+                (Visibility::Hidden, true)
+            }
+        } else {
+            (Visibility::Hidden, true)
+        };
         *ele_visibility = visibility;
+        // 不在视野中，但“看过”的，仅仅用一层灰色来展示
         if is_visited_tile {
             sprite.color = Color::srgba(1., 1., 1., 0.3);
         } else {

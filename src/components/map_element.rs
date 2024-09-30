@@ -1,32 +1,38 @@
 use bevy::prelude::*;
 
+/// 地图元素
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq)]
 pub enum MapElement {
     Void,
     Wall,
     Floor,
+    MapItem,
     Custom(i32),
 }
 
+/// 地图上元素的属性
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq, Default)]
-pub struct MapElementProperty {
-    is_transparent: bool,
-    is_collision: bool,
+pub struct MapElementProp {
+    /// 是否遮挡视野，决定了视野能否穿透
+    pub is_block_view: bool,
+    /// 是否碰撞体，决定了能否和其他的元素重叠
+    pub is_collision: bool,
 }
 
-impl MapElementProperty {
+impl MapElementProp {
+    /// 一些物体的基本属性
     pub fn get(ele: MapElement) -> Self {
         match ele {
             MapElement::Void => {
-                Self { is_collision: false, is_transparent: true }
+                Self { is_collision: false, is_block_view: true }
             }
             MapElement::Wall => {
-                Self { is_collision: true, is_transparent: false }
+                Self { is_collision: true, is_block_view: false }
             }
             MapElement::Floor => {
-                Self { is_collision: false, is_transparent: true }
+                Self { is_collision: false, is_block_view: true }
             }
-            _ => Self { is_collision: false, is_transparent: true },
+            _ => Self { is_collision: false, is_block_view: true },
         }
     }
 }
