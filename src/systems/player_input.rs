@@ -1,9 +1,9 @@
 use crate::components::field_of_vision::FieldOfVision;
-use crate::components::map_element::MapElement;
+use crate::components::map_element::{MapElement, SystemItemPickCursor};
 use crate::components::msg::{MapWantsToPick, WantsToMove};
 use crate::components::position_2d::Position2d;
 use crate::components::role::Player;
-use crate::components::{MapPickCursor, Naming};
+use crate::components::Naming;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::game_state::InGamingSubState;
 use crate::resources::{MapCameraCenter, TileSize};
@@ -93,7 +93,7 @@ pub fn player_picking_input(
     mut commands: Commands,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     q_fov: Query<&FieldOfVision, With<Player>>,
-    mut query_pick_cursor: Query<&mut Position2d, With<MapPickCursor>>,
+    mut query_pick_cursor: Query<&mut Position2d, With<SystemItemPickCursor>>,
     mut _map_camera: ResMut<MapCameraCenter>,
     map_builder: Res<GameMapBuilder>,
     mut next_state: ResMut<NextState<InGamingSubState>>,
@@ -131,13 +131,14 @@ pub fn pick_checking(
     mut commands: Commands,
     q_pick: Query<(Entity, &MapWantsToPick)>,
     q_map_ele: Query<(Entity, &Position2d), With<MapElement>>,
+    q_pick_cursor: Query<&SystemItemPickCursor>,
     q_name: Query<&Naming>,
-    mb: Res<GameMapBuilder>,
 ) {
     for (pick_msg, wants_to_pick) in q_pick.iter() {
         info!("check {:?}", wants_to_pick.position);
         let entities = q_map_ele.iter().filter_map(|(ent, pos)| {
-            if *pos == wants_to_pick.position {
+            // 注意，PickCursor也是一个MapElement，所以要排除
+            if *pos == wants_to_pick.position && !q_pick_cursor.contains(ent) {
                 Some(ent)
             } else {
                 None

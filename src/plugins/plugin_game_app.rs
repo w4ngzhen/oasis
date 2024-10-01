@@ -1,4 +1,4 @@
-use crate::components::MapPickCursor;
+use crate::components::map_element::SystemItemPickCursor;
 use crate::game_state::{GameState, InGamingSubState};
 use crate::resources::game_log::GameLog;
 use crate::resources::{MapCameraCenter, TileSize};
@@ -8,7 +8,7 @@ use crate::systems::fov::fov;
 use crate::systems::game_camera::{spawn_game_camera, update_game_camera};
 use crate::systems::game_hud::spawn_game_hud;
 use crate::systems::game_map::{
-    render_map_tile, setup_game_map, spawn_map_pick_cursor, spawn_map,
+    render_map_tile, setup_game_map, spawn_map, spawn_map_pick_cursor,
 };
 use crate::systems::monster_action::monster_chasing;
 use crate::systems::monster_spawn::spawn_monster;
@@ -89,7 +89,7 @@ impl Plugin for GameAppPlugin {
         )
         .add_systems(
             OnExit(InGamingSubState::MapPicking),
-            destroy_entity::<MapPickCursor>,
+            destroy_entity::<SystemItemPickCursor>,
         );
         app.add_systems(
             OnTransition {

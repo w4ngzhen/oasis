@@ -4,9 +4,11 @@ use bevy::prelude::*;
 #[derive(Component, Copy, Clone, PartialOrd, PartialEq)]
 pub enum MapElement {
     Void,
+    Role,
     Wall,
     Floor,
     MapItem,
+    SystemItem,
     Custom(i32),
 }
 
@@ -27,12 +29,16 @@ impl MapElementProp {
                 Self { is_collision: false, is_block_view: true }
             }
             MapElement::Wall => {
-                Self { is_collision: true, is_block_view: false }
+                Self { is_collision: true, is_block_view: true }
             }
             MapElement::Floor => {
-                Self { is_collision: false, is_block_view: true }
+                Self { is_collision: false, is_block_view: false }
             }
             _ => Self { is_collision: false, is_block_view: true },
         }
     }
 }
+
+/// 匹配MapElement::SystemItem
+#[derive(Component)]
+pub struct SystemItemPickCursor;

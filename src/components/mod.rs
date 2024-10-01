@@ -1,4 +1,3 @@
-use crate::components::map_element::MapElement;
 use crate::components::position_2d::Position2d;
 use bevy::prelude::*;
 
@@ -27,10 +26,6 @@ impl Default for MapTileElement {
 /// 用来呈现在地图镜头中心的元素的位置
 #[derive(Component)]
 pub struct CenterTilePosition(pub Position2d);
-
-/// 地图选择组件
-#[derive(Component, Clone, Copy)]
-pub struct MapPickCursor;
 
 #[derive(Component, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Naming(pub(crate) String);

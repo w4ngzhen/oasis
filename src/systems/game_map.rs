@@ -1,10 +1,12 @@
 use crate::components::bundles::element_render_bundle;
 use crate::components::field_of_vision::FieldOfVision;
-use crate::components::map_element::{MapElement, MapElementProp};
+use crate::components::map_element::{
+    MapElement, MapElementProp, SystemItemPickCursor,
+};
 use crate::components::msg::MapWantsToPick;
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::role::Player;
-use crate::components::{MapPickCursor, MapTileElement};
+use crate::components::MapTileElement;
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::core_module::game_map::themes::{
     tile_to_render_descriptor, TileRenderDescriptor,
@@ -16,7 +18,6 @@ use crate::utils::get_charset_index;
 use bevy::prelude::*;
 
 pub fn setup_game_map(mut commands: Commands) {
-    // prepare camera
     let mb = GameMapBuilder::new();
     commands.insert_resource(mb);
 }
@@ -61,14 +62,16 @@ pub fn spawn_map_pick_cursor(
     charset_asset: Res<CharsetAsset>,
 ) {
     if let Ok(player_pos) = query_player.get_single() {
-        commands.spawn((
-            MapPickCursor,
-            MapTileElement { color: Color::srgba(1., 1., 1., 0.5) },
-            Position2d::new(player_pos.x, player_pos.y),
-            PositionZIndex(999),
-            Visibility::Visible,
-            element_render_bundle(get_charset_index(14, 0), &charset_asset),
-        ));
+        commands
+            .spawn((
+                MapElement::SystemItem,
+                SystemItemPickCursor,
+                MapTileElement { color: Color::srgba(1., 1., 1., 0.5) },
+                Position2d::new(player_pos.x, player_pos.y),
+                PositionZIndex(999),
+                element_render_bundle(get_charset_index(14, 0), &charset_asset),
+            ))
+            .insert(Visibility::Visible);
         // at the same time, spawn an init WantsToPick msg.
         commands.spawn(MapWantsToPick { position: player_pos.clone() });
     } else {
@@ -76,7 +79,7 @@ pub fn spawn_map_pick_cursor(
     }
 }
 
-/// 渲染地图内容，其核心是将相关TileElement放置到对应位置
+/// 渲染地图内容，其核心是将所有拥有MapElement组件的实体的置到对应位置
 pub fn render_map_tile(
     mut q_map_ele: Query<(
         Entity,
@@ -106,7 +109,7 @@ pub fn render_map_tile(
         0.,
     );
     for (
-        ele_entity,
+        _,
         map_ele,
         tile_ele,
         ele_pos,
@@ -128,7 +131,7 @@ pub fn render_map_tile(
             // 除了玩家当前正看到的，剩余“看过”的地方
             // 因为玩家正看大到的，肯定属于“看过”的，所以这里只会有其余“看过”的
             // “看过”的位置，我们仅会展示墙壁、地面，其余都将进入迷雾
-           if *map_ele == MapElement::Floor || *map_ele == MapElement::Wall {
+            if *map_ele == MapElement::Floor || *map_ele == MapElement::Wall {
                 (Visibility::Visible, true)
             } else {
                 (Visibility::Hidden, true)

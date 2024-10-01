@@ -1,8 +1,11 @@
-use crate::components::bundles::monster_bundle;
+use crate::components::attributes::Attributes;
+use crate::components::bundles::{element_render_bundle, monster_bundle};
+use crate::components::field_of_vision::FieldOfVision;
 use crate::components::item::{Carrier, Equipped, Item, ItemId};
-use crate::components::position_2d::Position2d;
-use crate::components::role::RolePart;
-use crate::components::Naming;
+use crate::components::map_element::{MapElement, MapElementProp};
+use crate::components::position_2d::{Position2d, PositionZIndex};
+use crate::components::role::{Monster, RolePart};
+use crate::components::{MapTileElement, Naming};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::resources::CharsetAsset;
 use bevy::prelude::*;
@@ -19,7 +22,26 @@ pub fn spawn_monster(
         let monster_init_pos = room.center();
         let monster_name = Naming(format!("monster#{monster_idx}"));
         let monster_entity = commands
-            .spawn(monster_bundle(monster_init_pos, &charset_asset))
+            .spawn((
+                MapElement::Role,
+                MapElementProp { is_collision: true, is_block_view: true },
+                Monster,
+                MapTileElement {
+                    color: Color::srgba(0., 1., 0., 1.),
+                    ..default()
+                },
+                Attributes {
+                    max_hp: 20,
+                    current_hp: 20,
+                    damage: 15,
+                    defense: 10,
+                    ..default()
+                },
+                FieldOfVision { range: 6, ..default() },
+                Position2d { x: monster_init_pos.x, y: monster_init_pos.y },
+                PositionZIndex(2),
+                element_render_bundle('g' as usize, &charset_asset),
+            ))
             .insert(monster_name.clone())
             .id();
         pos_map.insert(monster_init_pos, monster_entity);

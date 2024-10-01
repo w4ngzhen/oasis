@@ -1,4 +1,5 @@
 use crate::components::map_element::MapElement;
+use crate::utils::get_charset_index;
 use bevy::prelude::*;
 
 pub struct TileRenderDescriptor {
@@ -19,12 +20,13 @@ pub fn tile_to_render_descriptor(
 ) -> Option<TileRenderDescriptor> {
     match map_ele {
         // index = 7 is a point
-        MapElement::Floor => {
-            Some(TileRenderDescriptor::new(7, Color::srgba(1., 1., 1., 1.0)))
-        }
+        MapElement::Floor => Some(TileRenderDescriptor::new(
+            get_charset_index(15, 10),
+            Color::srgba(1., 1., 1., 1.0),
+        )),
         MapElement::Wall => Some(TileRenderDescriptor::new(
             '#' as usize,
-            Color::srgba(0.3, 0.3, 0.3, 1.0),
+            Color::srgba(1., 1., 1., 1.0),
         )),
         _ => None,
     }

@@ -1,9 +1,10 @@
 use crate::components::attributes::Attributes;
-use crate::components::bundles::player_bundle;
+use crate::components::bundles::{element_render_bundle, player_bundle};
 use crate::components::field_of_vision::FieldOfVision;
+use crate::components::map_element::{MapElement, MapElementProp};
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::role::{Monster, Player};
-use crate::components::MapTileElement;
+use crate::components::{MapTileElement, Naming};
 use crate::core_module::game_map::game_map_builder::GameMapBuilder;
 use crate::resources::CharsetAsset;
 use bevy::prelude::*;
@@ -16,7 +17,24 @@ pub fn spawn_player(
     if let Some(first_room) = mb.rooms.first() {
         let player_init_pos = first_room.center();
         // spawn
-        commands.spawn(player_bundle(player_init_pos, &charset_asset));
+        commands.spawn((
+            Player,
+            Naming("player".into()),
+            MapElement::Role,
+            MapElementProp { is_collision: true, is_block_view: true },
+            MapTileElement { color: Color::WHITE, ..default() },
+            Attributes {
+                max_hp: 100,
+                current_hp: 100,
+                damage: 20,
+                defense: 10,
+                ..default()
+            },
+            FieldOfVision { ..default() },
+            Position2d { x: player_init_pos.x, y: player_init_pos.y },
+            PositionZIndex(2),
+            element_render_bundle('@' as usize, &charset_asset),
+        ));
     } else {
         warn!("Attempted to spawn a player without a room.")
     }

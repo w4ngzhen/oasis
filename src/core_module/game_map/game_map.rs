@@ -1,8 +1,7 @@
 use crate::components::map_element::MapElement;
 use crate::components::position_2d::Position2d;
 use crate::core_module::*;
-use bevy::prelude::*;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 const NUM_TILES: i32 = GAME_MAP_TILE_WIDTH * GAME_MAP_TILE_HEIGHT;
 
