@@ -8,6 +8,7 @@ pub fn setup_charset_assets(
 ) {
     let texture_handle: Handle<Image> =
         asset_server.load("tiles/charset_8x8_transparent.png".to_string());
+    // asset_server.load("tiles/basic_12x12.png".to_string());
     let layout = TextureAtlasLayout::from_grid(
         UVec2::splat(8),
         128 / 8,
