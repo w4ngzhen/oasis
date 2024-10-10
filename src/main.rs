@@ -3,6 +3,7 @@ use crate::in_main_menu::InMainMenuPlugin;
 use crate::in_player_config::InPlayerConfigPlugin;
 use crate::in_portal::InPortalPlugin;
 use bevy::prelude::*;
+use bevy_egui::EguiPlugin;
 
 mod components;
 mod core_module;
@@ -32,6 +33,7 @@ fn main() {
                 ..default()
             },
         ))
+        .add_plugins(EguiPlugin)
         .add_systems(Startup, setup_charset_assets)
         .add_plugins(GameAppPlugin)
         .add_plugins(PlayerPlugin)

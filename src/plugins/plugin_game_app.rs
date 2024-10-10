@@ -5,8 +5,8 @@ use crate::resources::{MapCameraCenter, TileSize};
 use crate::systems::combat::{handle_combat, handle_object_destroy};
 use crate::systems::end_turn::end_turn;
 use crate::systems::fov::fov;
-use crate::systems::game_camera::{spawn_game_camera, update_game_camera};
-use crate::systems::game_hud::spawn_game_hud;
+use crate::systems::game_camera::spawn_game_camera;
+use crate::systems::game_gui::game_ui_system;
 use crate::systems::game_map::{
     render_map_tile, setup_game_map, spawn_map, spawn_map_pick_cursor,
 };
@@ -39,8 +39,8 @@ impl Plugin for GameAppPlugin {
             },
             (
                 spawn_game_camera,
+                game_ui_system,
                 (setup_game_map, spawn_map).chain(),
-                spawn_game_hud,
                 finish_prepare_game,
             )
                 .chain(),
@@ -54,7 +54,7 @@ impl Plugin for GameAppPlugin {
         );
         app.add_systems(
             Update,
-            (update_game_camera, render_map_tile, scale_map, fov)
+            (game_ui_system, render_map_tile, scale_map, fov)
                 .run_if(in_state(GameState::InGaming)),
         );
         app.add_systems(

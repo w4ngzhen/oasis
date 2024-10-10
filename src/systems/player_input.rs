@@ -23,6 +23,9 @@ pub fn player_input(
         next_state.set(InGamingSubState::MapPicking);
         return;
     } else if keyboard_input.just_pressed(KeyCode::Period) {
+    } else if keyboard_input.just_pressed(KeyCode::Space) {
+        next_state.set(InGamingSubState::Modal);
+        return;
     }
 
     let pressed_key = keyboard_input.get_just_pressed().next().cloned();

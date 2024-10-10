@@ -27,5 +27,6 @@ pub enum InGamingSubState {
     PlayerAction,
     MapExploring,
     MapPicking,
+    Modal,
     MonsterAction,
 }

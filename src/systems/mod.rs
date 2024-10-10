@@ -2,7 +2,7 @@ pub mod combat;
 pub mod end_turn;
 pub mod fov;
 pub mod game_camera;
-pub mod game_hud;
+pub mod game_gui;
 pub mod game_map;
 pub mod monster_action;
 pub mod monster_spawn;
