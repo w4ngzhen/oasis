@@ -18,7 +18,6 @@ mod systems;
 mod utils;
 
 use crate::plugins::plugin_game_app::GameAppPlugin;
-use crate::plugins::plugin_player::PlayerPlugin;
 use crate::systems::setup::setup_charset_assets;
 
 fn main() {
@@ -36,10 +35,6 @@ fn main() {
         .add_plugins(EguiPlugin)
         .add_systems(Startup, setup_charset_assets)
         .add_plugins(GameAppPlugin)
-        .add_plugins(PlayerPlugin)
         .add_plugins((InPortalPlugin, InMainMenuPlugin, InPlayerConfigPlugin))
-        // init_state一定要放在add_plugins之后
-        .init_state::<GameState>()
-        .add_sub_state::<InGamingSubState>()
         .run();
 }

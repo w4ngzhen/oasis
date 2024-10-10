@@ -20,10 +20,7 @@ use crate::systems::player_input::{
 use crate::systems::player_spawn::spawn_player;
 use crate::utils::destroy_entity;
 use bevy::app::App;
-use bevy::prelude::{
-    in_state, IntoSystemConfigs, NextState, OnEnter, OnExit, OnTransition,
-    Plugin, ResMut, Update,
-};
+use bevy::prelude::*;
 
 pub struct GameAppPlugin;
 
@@ -32,6 +29,10 @@ impl Plugin for GameAppPlugin {
         app.insert_resource(MapCameraCenter(None))
             .insert_resource(TileSize(16.))
             .insert_resource(GameLog::new());
+        // 状态初始化
+        app.init_state::<GameState>().add_sub_state::<InGamingSubState>();
+        app.enable_state_scoped_entities::<InGamingSubState>();
+        // 各种系统
         app.add_systems(
             OnTransition {
                 exited: GameState::InMainMenu,
