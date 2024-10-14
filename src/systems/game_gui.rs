@@ -1,9 +1,12 @@
+use crate::components::attributes::Attributes;
 use crate::components::camera::GameMapCamera;
+use crate::components::role::Player;
 use crate::game_state::InGamingSubState;
 use bevy::prelude::*;
 use bevy::render::camera::Viewport;
 use bevy::utils::default;
 use bevy::window::PrimaryWindow;
+use bevy_egui::egui::{RichText, WidgetText};
 use bevy_egui::{egui, EguiContexts};
 
 /// UI 系统，需要在Update中运行
@@ -11,6 +14,7 @@ pub fn game_ui_system(
     mut q_map_camera: Query<&mut Camera, With<GameMapCamera>>,
     q_window: Query<&Window, With<PrimaryWindow>>,
     mut egui_ctx: EguiContexts,
+    q_attr: Query<(Entity, &Attributes), With<Player>>,
     current_state: Option<Res<State<InGamingSubState>>>, // 注意，要使用Option来处理
     mut next_state: ResMut<NextState<InGamingSubState>>,
 ) {
@@ -33,11 +37,17 @@ pub fn game_ui_system(
     let right = egui::SidePanel::right("right_panel")
         .resizable(true)
         .show(ctx, |ui| {
-            ui.label("Right resizeable panel");
-            ui.allocate_rect(
-                ui.available_rect_before_wrap(),
-                egui::Sense::hover(),
-            );
+            if let Ok((ent, attr)) = q_attr.get_single() {
+                // 显示生命值进度条
+                let progress = attr.current_hp as f32 / attr.max_hp as f32;
+                let progress_bar = egui::ProgressBar::new(progress).text(
+                    WidgetText::RichText(RichText::new(format!(
+                        "{}/{}",
+                        attr.current_hp, attr.max_hp
+                    ))),
+                );
+                ui.add(progress_bar);
+            }
         })
         .response
         .rect
