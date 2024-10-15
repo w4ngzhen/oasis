@@ -1,11 +1,11 @@
-use crate::core_module::game_map::game_map::{GameMap };
+use crate::components::map_element::MapElement;
+use crate::core_module::game_map::game_map::GameMap;
 use crate::core_module::game_map::tile_rect::TileRect;
 use crate::core_module::*;
-use crate::utils::rand_gen::RandGen;
+use basic::rand_gen::RandGen;
 use bevy::prelude::*;
 use rand::Rng;
 use std::cmp::{max, min};
-use crate::components::map_element::MapElement;
 
 const MAX_ROOMS: usize = 10;
 const MIN_ROOM_SIZE: i32 = 6;

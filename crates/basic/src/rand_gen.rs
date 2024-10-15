@@ -7,7 +7,7 @@ pub struct RandGen {
 }
 
 impl RandGen {
-    pub fn new(seed: Option<i32>) -> RandGen {
+    pub fn new(seed: Option<i32>) -> Self {
         let rng_seed = if let Some(seed) = seed { seed } else { 0 };
         let rng = Pcg64::seed_from_u64(rng_seed as u64);
         RandGen { rng }
@@ -29,24 +29,5 @@ impl RandGen {
             result += self.rng.gen_range(1..dice_size + 1);
         }
         result
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::utils::rand_gen::RandGen;
-
-    #[test]
-    fn test_range() {
-        let mut rand_gen = RandGen::new(None);
-        let result = rand_gen.range(0, 99);
-        println!("result = {}", result);
-    }
-
-    #[test]
-    fn test_dice() {
-        let mut rand_gen = RandGen::new(None);
-        let result = rand_gen.roll_dice(8, 6);
-        println!("result = {}", result);
     }
 }

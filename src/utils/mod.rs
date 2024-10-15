@@ -1,7 +1,6 @@
 use bevy::hierarchy::DespawnRecursiveExt;
 use bevy::prelude::{Commands, Component, Entity, Query, With};
 
-pub mod rand_gen;
 pub mod fov_utils;
 
 pub fn destroy_entity<T: Component>(to_destroy: Query<Entity, With<T>>, mut commands: Commands) {
