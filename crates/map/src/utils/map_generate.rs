@@ -1,17 +1,39 @@
-use noise::core::simplex::simplex_2d;
+use noise::core::perlin::perlin_2d;
 use noise::permutationtable::PermutationTable;
 use noise::utils::{NoiseMap, PlaneMapBuilder};
 
 pub(crate) fn generate_world(seed: u32) -> NoiseMap {
     let hasher = PermutationTable::new(seed);
     let map =
-        PlaneMapBuilder::new_fn(|point| simplex_2d(point.into(), &hasher).0)
+        PlaneMapBuilder::new_fn(|point| octave_perlin(point, &hasher, 2, 1.5))
             .set_is_seamless(true)
             .set_size(1024, 1024)
             .set_x_bounds(-5.0, 5.0)
             .set_y_bounds(-5.0, 5.0)
             .build();
     map
+}
+
+fn octave_perlin(
+    point: [f64; 2],
+    hasher: &PermutationTable,
+    octaves: usize,
+    persistence: f64,
+) -> f64 {
+    let mut total = 0.;
+    let mut frequency = 1.;
+    let mut amplitude = 1.;
+    let mut max_value = 0.;
+    for _ in 0..octaves {
+        let [x, y] = point;
+        let curr = perlin_2d([x * frequency, y * frequency].into(), hasher)
+            * amplitude;
+        total += curr;
+        max_value += amplitude;
+        amplitude *= persistence;
+        frequency *= 2.0;
+    }
+    total / max_value
 }
 
 #[cfg(test)]
