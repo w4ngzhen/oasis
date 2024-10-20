@@ -5,7 +5,7 @@ use noise::utils::{NoiseMap, PlaneMapBuilder};
 pub(crate) fn generate_world(seed: u32) -> NoiseMap {
     let hasher = PermutationTable::new(seed);
     let map =
-        PlaneMapBuilder::new_fn(|point| octave_perlin(point, &hasher, 2, 1.5))
+        PlaneMapBuilder::new_fn(|point| octave_perlin(point, &hasher, 1, 2.5))
             .set_is_seamless(true)
             .set_size(1024, 1024)
             .set_x_bounds(-5.0, 5.0)
