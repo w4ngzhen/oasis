@@ -1,5 +1,5 @@
 use noise::core::perlin::perlin_2d;
-use noise::permutationtable::PermutationTable;
+use noise::permutationtable::{NoiseHasher, PermutationTable};
 use noise::utils::{NoiseMap, PlaneMapBuilder};
 
 pub(crate) fn generate_world(seed: u32) -> NoiseMap {

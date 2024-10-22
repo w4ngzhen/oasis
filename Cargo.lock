@@ -2765,6 +2765,8 @@ version = "0.1.0"
 dependencies = [
  "image",
  "noise",
+ "rand",
+ "rand_xorshift",
 ]
 
 [[package]]

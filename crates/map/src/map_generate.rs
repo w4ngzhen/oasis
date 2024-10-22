@@ -1,8 +1,13 @@
-pub struct MapGenerate {}
+use crate::utils::linear_interpolation;
+use noise::permutationtable::{NoiseHasher, PermutationTable};
+
+pub struct MapGenerate {
+    hasher: PermutationTable,
+}
 
 impl MapGenerate {
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(seed: u32) -> Self {
+        Self { hasher: PermutationTable::new(seed) }
     }
 
     pub fn build(
@@ -16,7 +21,7 @@ impl MapGenerate {
         );
         for chunk_x in 0..chunk_w {
             for chunk_y in 0..chunk_h {
-                let list = self.build_chunk(chunk_size);
+                let list = self.build_chunk(chunk_x, chunk_y, chunk_size);
                 list.iter().for_each(|&x| {
                     map.push(x);
                 })
@@ -25,46 +30,52 @@ impl MapGenerate {
         map
     }
 
-    fn build_chunk(&self, chunk_size: i32) -> Vec<f64> {
-        let mut list: Vec<i32> =
-            Vec::with_capacity((chunk_size * chunk_size) as usize);
+    fn build_chunk(
+        &self,
+        chunk_x: i32,
+        chunk_y: i32,
+        chunk_size: i32,
+    ) -> Vec<f64> {
+        let c_lt = (chunk_x + 0, chunk_y + 0);
+        let c_rt = (chunk_x + chunk_size, chunk_y + 0);
+        let c_lb = (chunk_x + 0, chunk_y + chunk_size);
+        let c_rb = (chunk_x + chunk_size, chunk_y + chunk_size);
+
         // 这里我们暂时先固定4个
-        let g00 = (-2, 1);
-        let g01 = (3, 1);
-        let g10 = (-3, -1);
-        let g11 = (-1, 2);
-        let c00 = (0, 0);
-        let c01 = (chunk_size, 0);
-        let c10 = (chunk_size, chunk_size);
-        let c11 = (0, chunk_size);
+        let g_lt = self.hasher.hash(&[c_lt.0 as isize, c_lt.1 as isize]) as f64;
+        let g_rt = self.hasher.hash(&[c_rt.0 as isize, c_rt.1 as isize]) as f64;
+        let g_lb = self.hasher.hash(&[c_lb.0 as isize, c_lb.1 as isize]) as f64;
+        let g_rb = self.hasher.hash(&[c_rb.0 as isize, c_rb.1 as isize]) as f64;
+        // 四个角
+        let mut result: Vec<f64> =
+            Vec::with_capacity((chunk_size * chunk_size) as usize);
         let mut min = i32::MAX;
         let mut max = i32::MIN;
         for x in 0..chunk_size {
             for y in 0..chunk_size {
-                let v00 = (x - c00.0, y - c00.1);
-                let v01 = (x - c01.0, y - c01.1);
-                let v10 = (x - c10.0, y - c10.1);
-                let v11 = (x - c11.0, y - c11.1);
-                let val00 = v00.0 * g00.0 + v00.1 * g00.1;
-                let val01 = v01.0 * g01.0 + v01.1 * g01.1;
-                let val10 = v10.0 * g10.0 + v10.1 * g10.1;
-                let val11 = v11.0 * g11.0 + v11.1 * g11.1;
-                let val = val00 + val01 + val10 + val11;
-                if val < min {
-                    min = val;
-                } else if val > max {
-                    max = val;
-                }
-                list.push(val00 + val01 + val10 + val11);
+                let vec_lt = (x - c_lt.0, y - c_lt.1);
+                let vec_rt = (x - c_rt.0, y - c_rt.1);
+                let vec_lb = (x - c_lb.0, y - c_lb.1);
+                let vec_rb = (x - c_rb.0, y - c_rb.1);
+                let scalar_lt =
+                    vec_lt.0 as f64 * g_lt.cos() + vec_lt.1 as f64 * g_lt.sin();
+                let scalar_rt =
+                    vec_rt.0 as f64 * g_rt.cos() + vec_rt.1 as f64 * g_rt.sin();
+                let scalar_lb =
+                    vec_lb.0 as f64 * g_lb.cos() + vec_lb.1 as f64 * g_lb.sin();
+                let scalar_rb =
+                    vec_rb.0 as f64 * g_rb.cos() + vec_rb.1 as f64 * g_rb.sin();
+
+                // 1. 将top的left和right线性插值到一起，得到结果top线性插值结果，tli(top_linear_interpolation)
+                // 2. 将bottom的left和right线性插值到一起，得到结果bottom线性插值结果
+                // 3. 将将tli和bli再次进行线性插值
+                let top_val = linear_interpolation(scalar_lt, scalar_lb, 0.5);
+                let bottom_val =
+                    linear_interpolation(scalar_rt, scalar_rb, 0.5);
+                let val = linear_interpolation(top_val, bottom_val, 0.5);
+                result.push(val);
             }
         }
-        // 归一化
-        if min < 0 {
-            list = list.iter().map(|x| *x + min.abs()).collect();
-            max += min.abs();
-        }
-        let result: Vec<f64> =
-            list.iter().map(|x| *x as f64 / max as f64).collect();
         result
     }
 }
@@ -76,11 +87,35 @@ mod tests {
 
     #[test]
     fn test() {
-        let generate = MapGenerate::new();
-        let result = generate.build(1, 1, 1024);
+        let generate = MapGenerate::new(123);
+        let chunk_w = 16;
+        let chunk_h = 16;
+        let chunk_size = 64;
+        let mut max = i32::MIN;
+        let mut min = i32::MAX;
+        let mut result = generate
+            .build(chunk_w, chunk_h, chunk_size)
+            .iter()
+            .map(|x| {
+                let val = (*x * 1000.) as i32;
+                if val > max {
+                    max = val;
+                } else if val < min {
+                    min = val;
+                }
+                val
+            })
+            .collect::<Vec<_>>();
+        if min < 0 {
+            result = result.iter().map(|x| x + min.abs()).collect();
+            max += min.abs();
+        }
+
         println!("{:?}", result);
-        let pixels =
-            result.iter().map(|x| (*x * 255.) as u8).collect::<Vec<_>>();
+        let pixels = result
+            .iter()
+            .map(|x| ((*x as f64 / max as f64) * 255.) as u8)
+            .collect::<Vec<_>>();
         let target = Path::new("example_images/").join(Path::new("map.png"));
         fs::create_dir_all(
             target.clone().parent().expect("No parent directory found."),
@@ -90,8 +125,8 @@ mod tests {
         let _ = image::save_buffer(
             target,
             &pixels,
-            1 * 1024,
-            1 * 1024,
+            (chunk_w * chunk_size) as u32,
+            (chunk_h * chunk_size) as u32,
             image::ColorType::L8,
         );
     }
