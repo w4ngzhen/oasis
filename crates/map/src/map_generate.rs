@@ -1,13 +1,14 @@
+use crate::hasher::Hasher;
 use crate::utils::linear_interpolation;
 use noise::permutationtable::{NoiseHasher, PermutationTable};
 
 pub struct MapGenerate {
-    hasher: PermutationTable,
+    hasher: Hasher,
 }
 
 impl MapGenerate {
-    pub fn new(seed: u32) -> Self {
-        Self { hasher: PermutationTable::new(seed) }
+    pub fn new(seed: i32) -> Self {
+        Self { hasher: Hasher::new(seed) }
     }
 
     pub fn build(
@@ -41,16 +42,20 @@ impl MapGenerate {
         let c_lb = (chunk_x + 0, chunk_y + chunk_size);
         let c_rb = (chunk_x + chunk_size, chunk_y + chunk_size);
 
-        // 这里我们暂时先固定4个
-        let g_lt = self.hasher.hash(&[c_lt.0 as isize, c_lt.1 as isize]) as f64;
-        let g_rt = self.hasher.hash(&[c_rt.0 as isize, c_rt.1 as isize]) as f64;
-        let g_lb = self.hasher.hash(&[c_lb.0 as isize, c_lb.1 as isize]) as f64;
-        let g_rb = self.hasher.hash(&[c_rb.0 as isize, c_rb.1 as isize]) as f64;
-        // 四个角
+        // 四个角的伪随机梯度
+        let g_lt = self.hasher.hash(&(c_lt.0 as f64, c_lt.1 as f64));
+        let g_rt = self.hasher.hash(&(c_rt.0 as f64, c_rt.1 as f64));
+        let g_lb = self.hasher.hash(&(c_lb.0 as f64, c_lb.1 as f64));
+        let g_rb = self.hasher.hash(&(c_rb.0 as f64, c_rb.1 as f64));
+        // println!(
+        //     "{:?}, {:?}, {:?}, {:?}",
+        //     (g_lt.sin(), g_lt.cos()),
+        //     (g_rt.sin(), g_rt.cos()),
+        //     (g_lb.sin(), g_lb.cos()),
+        //     (g_rb.sin(), g_rb.cos())
+        // );
         let mut result: Vec<f64> =
             Vec::with_capacity((chunk_size * chunk_size) as usize);
-        let mut min = i32::MAX;
-        let mut max = i32::MIN;
         for x in 0..chunk_size {
             for y in 0..chunk_size {
                 let vec_lt = (x - c_lt.0, y - c_lt.1);
@@ -76,6 +81,7 @@ impl MapGenerate {
                 result.push(val);
             }
         }
+        println!("{:?}", result);
         result
     }
 }
