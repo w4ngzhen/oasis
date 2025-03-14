@@ -4,21 +4,22 @@ use bevy::prelude::*;
 use std::ops::DerefMut;
 
 pub fn setup_main_menu(mut commands: Commands) {
-    commands.spawn((InMainMenuScreen, Camera2dBundle::default()));
+    commands.spawn((InMainMenuScreen, Camera2d::default()));
     commands
         .spawn((
             InMainMenuScreen,
-            NodeBundle {
-                style: Style { height: Val::Percent(100.), width: Val::Percent(100.), ..default() },
-                background_color: Color::srgb(0.1, 0.1, 0.1).into(),
-                ..default()
+            Node {
+                height: Val::Percent(100.),
+                width: Val::Percent(100.),
+                ..Default::default()
             },
+            BackgroundColor(Color::srgb(0.1, 0.1, 0.1).into()),
         ))
         .with_children(|parent| {
             // parent.spa
             parent
-                .spawn(NodeBundle {
-                    style: Style {
+                .spawn((
+                    Node {
                         flex_direction: FlexDirection::Column,
                         row_gap: Val::Px(10.),
                         position_type: PositionType::Absolute,
@@ -28,43 +29,63 @@ pub fn setup_main_menu(mut commands: Commands) {
                         border: UiRect::all(Val::Px(2.)),
                         ..default()
                     },
-                    border_color: Color::srgb(1.0, 0., 0.).into(),
-                    ..default()
-                })
-                .with_children(|p| {
-                    create_menu_button(p, MenuButtonAction::NewGame, "New Game");
-                    create_menu_button(p, MenuButtonAction::ContinueGame, "Continue Game");
-                    create_menu_button(p, MenuButtonAction::Settings, "Settings");
-                    create_menu_button(p, MenuButtonAction::Quit, "Quit");
+                    BackgroundColor(Color::srgb(1.0, 0., 0.).into()),
+                ))
+                .with_children(|parent_builder| {
+                    create_menu_button(
+                        parent_builder,
+                        MenuButtonAction::NewGame,
+                        "New Game",
+                    );
+                    create_menu_button(
+                        parent_builder,
+                        MenuButtonAction::ContinueGame,
+                        "Continue Game",
+                    );
+                    create_menu_button(
+                        parent_builder,
+                        MenuButtonAction::Settings,
+                        "Settings",
+                    );
+                    create_menu_button(
+                        parent_builder,
+                        MenuButtonAction::Quit,
+                        "Quit",
+                    );
                 });
         });
 }
 
-fn create_menu_button(builder: &mut ChildBuilder, action: MenuButtonAction, button_label: &str) {
-    let button_text_style = TextStyle { font_size: 40.0, color: BUTTON_NORMAL_COLOR, ..default() };
-    builder.spawn((action, ButtonBundle { ..default() })).with_children(|p| {
-        p.spawn(TextBundle::from_section(button_label, button_text_style));
+fn create_menu_button(
+    builder: &mut ChildBuilder,
+    btn_action: MenuButtonAction,
+    button_label: &str,
+) {
+    builder.spawn((btn_action, Button { ..default() })).with_children(|p| {
+        p.spawn((
+            Text::new(button_label),
+            TextFont { font_size: 40.0, ..default() },
+            TextColor(BUTTON_NORMAL_COLOR),
+        ));
     });
 }
 
 pub fn menu_button_system(
-    mut interaction_query: Query<
+    mut game_state: ResMut<NextState<GameState>>,
+    mut q_interaction: Query<
         (&Interaction, &MenuButtonAction, &Children),
         (Changed<Interaction>, With<Button>),
     >,
-    mut game_state: ResMut<NextState<GameState>>,
-    mut text_query: Query<&mut Text>,
+    mut q_text_color: Query<&mut TextColor, With<Text>>,
 ) {
-    fn set_text_color(text: &mut Text, color: Color) {
-        text.sections.iter_mut().for_each(|section| {
-            section.style.color = color;
-        })
+    fn set_text_color(text_color: &mut TextColor, color: Color) {
+        *text_color = color.into();
     }
-    for (interaction, action, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
+    for (interaction, action, children) in &mut q_interaction {
+        let mut text_color = q_text_color.get_mut(children[0]).unwrap();
         match *interaction {
             Interaction::Pressed => {
-                set_text_color(&mut text, BUTTON_PRESSED_COLOR);
+                set_text_color(&mut text_color, BUTTON_PRESSED_COLOR);
                 match action {
                     MenuButtonAction::NewGame => {
                         game_state.deref_mut().set(GameState::InPlayerConfig);
@@ -82,10 +103,10 @@ pub fn menu_button_system(
                 }
             }
             Interaction::Hovered => {
-                set_text_color(&mut text, BUTTON_HOVER_COLOR);
+                set_text_color(&mut text_color, BUTTON_HOVER_COLOR);
             }
             Interaction::None => {
-                set_text_color(&mut text, BUTTON_NORMAL_COLOR);
+                set_text_color(&mut text_color, BUTTON_NORMAL_COLOR);
             }
         }
     }

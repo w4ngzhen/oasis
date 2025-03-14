@@ -4,26 +4,23 @@ use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 
 pub fn setup_player_config_screen(mut commands: Commands) {
-    commands.spawn((InPlayerConfigScreen, Camera2dBundle::default()));
+    commands.spawn((InPlayerConfigScreen, Camera2d::default()));
     commands
         .spawn((
             InPlayerConfigScreen,
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.),
-                    height: Val::Percent(100.),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                background_color: Color::srgb(1.0, 0.5, 0.5).into(),
+            Node {
+                width: Val::Percent(100.),
+                height: Val::Percent(100.),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
                 ..default()
             },
+            BackgroundColor(Color::srgb(1.0, 0.5, 0.5).into()),
         ))
         .with_children(|p| {
-            p.spawn(TextBundle::from_section(
-                "hello, player config.",
-                TextStyle { color: Color::srgb(1., 1., 1.), ..default() },
+            p.spawn((
+                Text::new("hello, player config."),
+                TextColor(Color::srgb(1., 1., 1.).into()),
             ));
         });
 }

@@ -18,7 +18,7 @@ pub fn setup_charset_assets(
     );
     let texture_atlas_layout_handle = texture_atlas_layouts.add(layout);
     commands.insert_resource(CharsetAsset {
-        atlas: texture_atlas_layout_handle.clone(),
+        atlas_layout: texture_atlas_layout_handle.clone(),
         texture: texture_handle.clone(),
     });
     commands.insert_resource(PlayerSettings { auto_pick: true, ..default() });

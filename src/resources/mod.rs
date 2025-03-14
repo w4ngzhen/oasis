@@ -5,7 +5,7 @@ use bevy::prelude::*;
 
 #[derive(Resource)]
 pub struct CharsetAsset {
-    pub atlas: Handle<TextureAtlasLayout>,
+    pub atlas_layout: Handle<TextureAtlasLayout>,
     pub texture: Handle<Image>,
 }
 

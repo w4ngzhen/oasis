@@ -1,8 +1,8 @@
+use crate::components::MapTileElement;
 use crate::components::attributes::Attributes;
 use crate::components::field_of_vision::FieldOfVision;
 use crate::components::position_2d::{Position2d, PositionZIndex};
 use crate::components::role::{Monster, Player};
-use crate::components::MapTileElement;
 use crate::resources::CharsetAsset;
 use bevy::prelude::*;
 
@@ -52,15 +52,12 @@ pub fn element_render_bundle(
     tile_index: usize,
     charset_asset: &Res<CharsetAsset>,
 ) -> impl Bundle {
-    (
-        SpriteBundle {
-            sprite: Sprite {
-                custom_size: Some(Vec2::new(1.0, 1.0)),
-                ..Default::default()
-            },
-            texture: charset_asset.texture.clone(),
-            ..Default::default()
-        },
-        TextureAtlas { layout: charset_asset.atlas.clone(), index: tile_index },
-    )
+    (Sprite {
+        custom_size: Some(Vec2::new(1.0, 1.0)),
+        texture_atlas: Some(TextureAtlas {
+            layout: charset_asset.atlas_layout.clone(),
+            index: tile_index,
+        }),
+        ..default()
+    })
 }

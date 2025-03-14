@@ -7,9 +7,7 @@ pub fn spawn_game_camera(mut commands: Commands) {
     commands.spawn((
         GameMapCamera,
         RenderLayers::layer(0),
-        Camera2dBundle {
-            camera: Camera { order: 0, ..default() },
-            ..default()
-        },
+        Camera2d,
+        Camera { order: 0, ..default() },
     ));
 }
